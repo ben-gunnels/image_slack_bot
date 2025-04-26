@@ -101,7 +101,7 @@ class EventHandler:
 
         if self._handle_image_prompt_and_generation(self.input_filename, output_filename) == 200:
             send_file(self.channel_id, output_filename)
-            self._cleanup()
+            self._cleanup(output_filename)
         else:
             send_message(self.channel_id, f"Something went wrong with ImageGeneratorBot :( Image request could not be generated.")
 
@@ -148,9 +148,10 @@ class EventHandler:
             if flag in self.flags:
                 setattr(self, flag, True)
 
-    def _cleanup(self):
+    def _cleanup(self, output_filename):
         # Remove stored slack image
         os.remove(self.input_filename)
+        os.remove(output_filename)
 
 
 
