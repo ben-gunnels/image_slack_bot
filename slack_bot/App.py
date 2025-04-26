@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from EventHandler import EventHandler
 import logging
@@ -14,6 +15,10 @@ logging.basicConfig(
 app = Flask(__name__)
 
 events_of_interest = set({"app_mention"})
+
+@app.route("/")
+def hello():
+    return "Hello from Railway!"
 
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
@@ -46,5 +51,6 @@ def slack_events():
 
     return '', 200
 
-if __name__ == '__main__':
-    app.run(port=3000)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Default to 5000 if not set
+    app.run(host="0.0.0.0", port=port)
