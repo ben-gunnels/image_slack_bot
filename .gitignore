@@ -1,0 +1,11 @@
+*.log
+*.log.archive
+
+image_outputs/
+user_submitted_files/
+
+clean.py
+
+__pycache__
+
+.env
