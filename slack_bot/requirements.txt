@@ -4,4 +4,5 @@ Flask>=2.2.0
 requests>=2.32.0
 python-dotenv>=1.0.0  # If you are loading environment variables from .env files
 pillow>=11.2.0
+numpy>=2.2.0
 gunicorn
