@@ -143,7 +143,7 @@ class EventHandler:
 
     def _handle_image_reformatting(self, output_filename):
         # Only handle tasks related to reformating the image submitted.
-        with open("path/to/your/image.png", "rb") as f:
+        with open(self.input_filename, "rb") as f:
             image_bytes = f.read()
 
         if self.verbose:
