@@ -97,6 +97,8 @@ class EventHandler:
 
         if self.reformat:
             output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.{ext}"
+            send_message(self.channel_id, f"Slack Bot will send a file with the name {output_filename.split('/')[-1]} here... :hourglass_flowing_sand:")
+
             self._handle_image_reformatting(output_filename)
             self._cleanup()
             return
