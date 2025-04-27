@@ -68,12 +68,12 @@ def download_slack_file(file_url, local_filename, token=SLACK_TOKEN):
     else:
         print(f"Failed to download: {response.status_code}, {response.text}")
 
-def send_file(channel_id, filename):
+def send_file(channel_id, filename, message="Here’s an AI-generated Image! 🎨"):
     with open(filename, "rb") as f:
         try:
             response = client.files_upload_v2(
                 channel=channel_id,
-                initial_comment="Here’s an AI-generated Image! 🎨",
+                initial_comment=message,
                 file_uploads=[
                     {
                         "file": f,

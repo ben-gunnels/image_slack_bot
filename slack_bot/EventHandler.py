@@ -159,7 +159,7 @@ class EventHandler:
         if self.verbose:
             send_message(self.channel_id, "Image has been saved locally. I will try sending it in this channel...")
         # Send the output to slack    
-        send_file(self.channel_id, output_filename)
+        send_file(self.channel_id, output_filename, "Here's your reformatted image!")
 
     def _mkdirs(self, folder_path):
         # Check if the folder exists
