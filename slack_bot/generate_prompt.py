@@ -26,11 +26,11 @@ def generate_prompt(image_path):
     
     dense_prompt = """
     Analyze and assess this image for its aesthetic qualities. Return a prompt that will be used to generate
-    a unique design based on the characteristics of the image. Create a bold, eye-catching T-shirt graphic 
-    inspired by the central design in this photo. 
-    Reimagine it as a clean, high-impact vector-style illustration with a transparent background. 
+    a design based on the characteristics of the image. Create a bold, eye-catching T-shirt graphic 
+    using the central design in this photo. 
+    Regenerate the design as a clean, high-impact vector-style illustration with a transparent background. 
     Emphasize strong contrast, simplified forms, and visual clarity suitable for screen-printing. 
-    Retain the core symbolic or visual elements from the original image, but give it a slightly modern, 
+    Retain the core symbolic or visual elements from the original image, give it a modern, 
     graphic-art twist—perfect for a streetwear-style T-shirt.
     Return me just the design with a transparent background. Keep the prompt to less than 1000 words.
     """
