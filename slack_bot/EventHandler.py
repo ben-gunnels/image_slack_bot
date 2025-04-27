@@ -17,7 +17,8 @@ EVENTS = {
 
 VALID_FLAGS = {
     "verbose",
-    "help"
+    "help",
+    "reformat"
 }
 
 VALID_CHANNEL = os.getenv("VALID_CHANNEL")
@@ -42,6 +43,7 @@ class EventHandler:
         # Flags passed by user
         self.verbose = False
         self.help = False
+        self.reformat = False
 
         self._mkdirs("user_submitted_files")
         self._mkdirs("image_outputs")
@@ -93,7 +95,13 @@ class EventHandler:
         if self.verbose:
             send_message(self.channel_id, "Your submitted image has been downloaded...")
 
-        output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.png"
+        if self.reformat:
+            output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.{ext}"
+            self._handle_image_reformatting(output_filename)
+            self._cleanup()
+            return
+
+        output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.png" # Unconditionally set the extension to png if it is being generated
         send_message(self.channel_id, f"Slack Bot will send a file with the name {output_filename.split('/')[-1]} here... :hourglass_flowing_sand:")
 
         if self.verbose:
@@ -133,6 +141,24 @@ class EventHandler:
         except Exception:
             print(f"Image generation could not be completed.")
 
+    def _handle_image_reformatting(self, output_filename):
+        # Only handle tasks related to reformating the image submitted.
+        with open("path/to/your/image.png", "rb") as f:
+            image_bytes = f.read()
+
+        if self.verbose:
+            send_message(self.channel_id, "Resizing image...")
+        resized_image = resize_image(image_bytes)
+        
+        if self.verbose:
+            send_message(self.channel_id, "Saving result...")
+        resized_image.save(output_filename, dpi=(300, 300))
+
+        if self.verbose:
+            send_message(self.channel_id, "Image has been saved locally. I will try sending it in this channel...")
+        # Send the output to slack    
+        send_file(self.channel_id, output_filename)
+
     def _mkdirs(self, folder_path):
         # Check if the folder exists
         if not os.path.exists(folder_path):
@@ -150,8 +176,11 @@ class EventHandler:
 
     def _cleanup(self, output_filename):
         # Remove stored slack image
-        os.remove(self.input_filename)
-        os.remove(output_filename)
+        if os.path.exists(self.input_filename):
+            os.remove(self.input_filename)
+
+        if os.path.exists(output_filename):
+            os.remove(output_filename)
 
 
 
