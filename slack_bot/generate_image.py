@@ -26,10 +26,11 @@ def generate_image(logger, prompt, input_filename):
                 model=model,
                 prompt=prompt[:1000],
                 image=[
-                    input_filename
+                    open(input_filename, 'rb')
                 ],
                 size="1024x1024",
                 n=1,
+                background="transparent"
             )
 
         image_base64 = response.data[0].b64_json
