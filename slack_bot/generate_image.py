@@ -12,6 +12,12 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-image-1"  # "dall-e-2 "
 def generate_image(logger, prompt, input_filename):
     try:
+        if os.path.exists(input_filename):
+            print(f"File is valid and can be used for image generation.")
+        
+        else:
+            print(f"File is invalid and cannot be used for image generation.")
+
         if model == "dall-e-2":
             response = client.images.generate(
                 model=model,
@@ -38,6 +44,7 @@ def generate_image(logger, prompt, input_filename):
 
         return image_bytes
     except Exception as e:
+        print(f"Error during image generation: {e}")
         logger.info(f"Error during image generation: {e}")
         raise
 

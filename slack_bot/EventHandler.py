@@ -45,6 +45,9 @@ class EventHandler:
         self.help = False
         self.reformat = False
 
+        remove_directory_recursively("user_submitted_files")
+        remove_directory_recursively("image_outputs")
+
         self._mkdirs("user_submitted_files")
         self._mkdirs("image_outputs")
 

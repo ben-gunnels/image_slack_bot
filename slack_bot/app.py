@@ -4,6 +4,9 @@ from EventHandler import EventHandler
 import logging
 import threading
 
+if os.path.exists("app.log"):
+    os.remove("app.log")
+
 # Basic config
 logging.basicConfig(
     filename="app.log",
