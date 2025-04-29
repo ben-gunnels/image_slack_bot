@@ -25,10 +25,8 @@ def generate_prompt():
     # base64_image = encode_image(image_path)
     
     dense_prompt = """
-    Analyze and assess this image for its aesthetic qualities. Return a prompt that will be used to generate
-    a design based on the characteristics of the image. Accurately and faithfully recreate the graphic image 
-    with your description. 
-    I want the design just with a transparent background. Keep the prompt to less than 1000 words.
+    Recreate this image.
+    I want the design just with a transparent background.
     """
 
     # response = client.responses.create(

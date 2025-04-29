@@ -1,5 +1,6 @@
 *.log
-*.log.archive
+
+oldprompts.txt
 
 image_outputs/
 user_submitted_files/
