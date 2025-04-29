@@ -121,7 +121,8 @@ class EventHandler:
             generated_prompt = generate_prompt()
             self.logger.info("Prompt generated")
             if self.verbose:
-                send_message(self.channel_id, "Seed prompt has been generated...")
+                send_message(self.channel_id, "Seed prompt has been generated:")
+                send_message(self.channel_id, generate_prompt)
 
             # Make a call to OpenAi image generation model based on the prompt
             generated_image = generate_image(self.logger, generated_prompt, input_filename)
