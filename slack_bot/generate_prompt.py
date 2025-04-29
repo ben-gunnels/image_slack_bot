@@ -25,8 +25,10 @@ def generate_prompt():
     # base64_image = encode_image(image_path)
     
     dense_prompt = """
-    Recreate this image.
-    I want the design just with a transparent background.
+    Recreate the central design of this image.
+    The design must be by itself without any of the background context. 
+    The design should be immediately transferrable as printable for a T-Shirt.
+    I want just the central design just with a transparent background.
     """
 
     # response = client.responses.create(
