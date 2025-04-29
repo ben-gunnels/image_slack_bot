@@ -28,7 +28,7 @@ def generate_image(logger, prompt, input_filename):
             )
         
         elif model == "gpt-image-1":
-            response = client.images.generate(
+            response = client.images.edit(
                 model=model,
                 prompt=prompt[:1000], # Input prompt is restricted to 100 characters
                 image=[
