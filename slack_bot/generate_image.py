@@ -36,7 +36,6 @@ def generate_image(logger, prompt, input_filename):
                 ],
                 size="1024x1024",
                 n=1,
-                background="transparent"
             )
 
         image_base64 = response.data[0].b64_json
