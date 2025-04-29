@@ -117,14 +117,14 @@ class EventHandler:
 
     def _handle_image_prompt_and_generation(self, input_filename, output_filename):
         try:
-            # Make a call to chatgpt to get a dense prompt for creating an image
-            generated_prompt = generate_prompt(input_filename)
+            # Get the dense prompt
+            generated_prompt = generate_prompt()
             self.logger.info("Prompt generated")
             if self.verbose:
                 send_message(self.channel_id, "Seed prompt has been generated...")
 
             # Make a call to OpenAi image generation model based on the prompt
-            generated_image = generate_image(generated_prompt, self.logger)
+            generated_image = generate_image(self.logger, generated_prompt, input_filename)
             self.logger.info("Image generated")
             if self.verbose: 
                 send_message(self.channel_id, "Image has been generated...")
@@ -174,7 +174,7 @@ class EventHandler:
 
         for flag in VALID_FLAGS:
             if flag in self.flags:
-                setattr(self, flag, True)
+                setattr(self, flag, True) 
 
     def _cleanup(self, output_filename):
         # Remove stored slack image

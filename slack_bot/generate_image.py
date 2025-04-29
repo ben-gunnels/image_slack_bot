@@ -10,7 +10,7 @@ __all__ = ["generate_image"]
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 model = "gpt-image-1"  # "dall-e-2 "
-def generate_image(prompt, logger):
+def generate_image(logger, prompt, input_filename):
     try:
         if model == "dall-e-2":
             response = client.images.generate(
@@ -25,6 +25,9 @@ def generate_image(prompt, logger):
             response = client.images.generate(
                 model=model,
                 prompt=prompt[:1000],
+                image=[
+                    input_filename
+                ],
                 size="1024x1024",
                 n=1,
             )
