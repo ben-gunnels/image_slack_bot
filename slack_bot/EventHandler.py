@@ -45,8 +45,11 @@ class EventHandler:
         self.help = False
         self.reformat = False
 
-        remove_directory_recursively("user_submitted_files")
-        remove_directory_recursively("image_outputs")
+        try:
+            remove_directory_recursively("user_submitted_files")
+            remove_directory_recursively("image_outputs")
+        except:
+            pass
 
         self._mkdirs("user_submitted_files")
         self._mkdirs("image_outputs")
@@ -112,13 +115,13 @@ class EventHandler:
         if self.verbose:
             send_message(self.channel_id, "I will generate verbose update messages. Keeping you up to date on my task completion.")
 
-        if self._handle_image_prompt_and_generation(self.input_filename, output_filename) == 200:
+        if self._handle_image_prompt_and_generation(output_filename) == 200:
             send_file(self.channel_id, output_filename)
             self._cleanup(output_filename)
         else:
             send_message(self.channel_id, f"Something went wrong with ImageGeneratorBot :( Image request could not be generated.")
 
-    def _handle_image_prompt_and_generation(self, input_filename, output_filename):
+    def _handle_image_prompt_and_generation(self, output_filename):
         try:
             # Get the dense prompt
             generated_prompt = generate_prompt()
@@ -128,7 +131,7 @@ class EventHandler:
                 send_message(self.channel_id, generate_prompt)
 
             # Make a call to OpenAi image generation model based on the prompt
-            generated_image = generate_image(self.logger, generated_prompt, input_filename)
+            generated_image = generate_image(self.logger, generated_prompt, self.input_filename)
             self.logger.info("Image generated")
             if self.verbose: 
                 send_message(self.channel_id, "Image has been generated...")
