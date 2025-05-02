@@ -18,13 +18,14 @@ EVENTS = {
 VALID_FLAGS = {
     "verbose",
     "help",
-    "reformat"
+    "reformat",
+    "inject"
 }
 
 VALID_CHANNEL = os.getenv("VALID_CHANNEL")
 
 class EventHandler:
-    def __init__(self, logger, event_type: str, channel_id: str, private_url: str, user: str, text: str, files):
+    def __init__(self, logger, event_type: str, channel_id: str, user: str, text: str, files: list):
         if channel_id != VALID_CHANNEL:
             return 
         
@@ -34,7 +35,6 @@ class EventHandler:
         self.event_type = event_type
         self.channel_id = channel_id
         
-        self.private_url = private_url
         self.user = user
         self.text = text
         self.files = files
@@ -44,6 +44,7 @@ class EventHandler:
         self.verbose = False
         self.help = False
         self.reformat = False
+        self.inject = False
 
         try:
             remove_directory_recursively("user_submitted_files")
@@ -66,7 +67,7 @@ class EventHandler:
             self.logger.info("Handling app_mention...")
             self._handle_app_mention()
         elif self.event_type == "file_shared":
-            self._handle_file_shared()
+            self._handle_files_shared()
 
     def _handle_message(self):
         """
@@ -75,7 +76,6 @@ class EventHandler:
         send_message(self.channel_id, f"Hello {self.user} -- from Slack Bot")
 
     def _handle_app_mention(self):
-        self.logger.info(f"Handling app_mention {self.private_url}")
         if self.help:
             message = (
                 f"Hello <@{self.user}>! :wave:\n\n"
@@ -85,19 +85,31 @@ class EventHandler:
                 "I'll handle the rest and create your AI-generated image! :art:"
             )
             send_message(self.channel_id, message)
-        if self.private_url:
-            self._handle_file_shared()
-    
+        if len(self.files):
+            self._handle_files_shared()
 
-    def _handle_file_shared(self):
-        if self.files:
-            ext = self.files[0].get("filetype").lower()
+    def _handle_files_shared(self):
+        """
+            Sends each file in the batch off to be handled by the file handler.
+        """
+        for file in self.files:
+            self._handle_file_shared(file)
+        return
+
+    def _handle_file_shared(self, file):
+        """
+            This process downloads the file from slack through the channel.
+            It then uploads the image along with the prompt to the OpenAI image generation API.
+            The file is then sent through the slack channel. 
+        """
+        if file:
+            ext = file.get("filetype").lower()
         else:
             ext = "png"
         now = datetime.datetime.now()
         self.input_filename = f"user_submitted_files/{now.strftime('%Y-%m-%d-%H-%M-%S')}.{ext}"
 
-        download_slack_file(self.private_url, self.input_filename)
+        download_slack_file(file["url_private"], self.input_filename)
         if self.verbose:
             send_message(self.channel_id, "Your submitted image has been downloaded...")
 
@@ -130,9 +142,13 @@ class EventHandler:
                 send_message(self.channel_id, "Seed prompt has been generated:")
                 send_message(self.channel_id, generated_prompt)
 
+            if self.inject:
+                # Inject the clean text into the prompt to help add instructions.
+                self.text = clean_text(self.text)
+                generated_prompt = generated_prompt + self.text
+
             # Make a call to OpenAi image generation model based on the prompt
             generated_image = generate_image(self.logger, generated_prompt, self.input_filename)
-            self.logger.info("Image generated")
             if self.verbose: 
                 send_message(self.channel_id, "Image has been generated...")
 

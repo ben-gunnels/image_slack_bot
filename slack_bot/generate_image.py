@@ -31,9 +31,9 @@ def generate_image(logger, prompt, input_filename):
             response = client.images.edit(
                 model=model,
                 prompt=prompt[:1000], # Input prompt is restricted to 100 characters
-                image=[
+                image=(
                     open(input_filename, 'rb')
-                ],
+                ),
                 size="1024x1024",
                 n=1,
             )

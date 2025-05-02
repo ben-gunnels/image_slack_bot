@@ -40,14 +40,10 @@ def slack_events():
         event_type = event.get("type")
         channel_id = event.get("channel")
         files = event.get("files")
-        if files:
-            url_private = files[0].get("url_private")
-        else:
-            url_private = None
 
         if event_type in events_of_interest:
-            event_handler = EventHandler(app.logger, event_type, channel_id, url_private, user, text, files)
-            app.logger.info(f"{event_type} message from {user}: {text}, channel: {channel_id}, url: {url_private}")
+            event_handler = EventHandler(app.logger, event_type, channel_id, user, text, files)
+            app.logger.info(f"{event_type} message from {user}: {text}, channel: {channel_id}")
 
             # Launch background thread
             threading.Thread(target=event_handler.handle_event).start()

@@ -21,3 +21,15 @@ def find_flags(text):
     pattern = r'--(\w+)'  # Look for -- followed by letters, digits, underscores
     flags = re.findall(pattern, text)
     return set(flags)
+
+def clean_text(text):
+    # Remove things in angle brackets
+    text = re.sub(r'<[^>]+>', '', text)
+
+    # Remove flags starting with --
+    text = re.sub(r'\s--\S+', '', text)
+
+    # Strip leading/trailing whitespace
+    text = text.strip()
+
+    return text
