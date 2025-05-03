@@ -38,16 +38,20 @@ def generate_prompt(mode="static", injection=""):
         The design should be immediately transferrable as printable for a T-Shirt.
         I want just the central design described just with a transparent background.
         """
-        response = client.responses.create(
-            model="gpt-4o",
-            input=[
-                {
-                    "role": "user",
-                    "content": [
-                        { "type": "input_text", "text": dense_prompt + " " + injection },
-                    ],
-                }
-            ],
-        )
+        try:
+            response = client.responses.create(
+                model="gpt-4o",
+                input=[
+                    {
+                        "role": "user",
+                        "content": [
+                            { "type": "input_text", "text": dense_prompt + " " + injection },
+                        ],
+                    }
+                ],
+            )
+            
+            return response.output[0].content[0].text
 
-        return response
+        except Exception as e:
+            print(e)
