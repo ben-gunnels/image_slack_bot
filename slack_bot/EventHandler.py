@@ -90,6 +90,8 @@ class EventHandler:
             send_message(self.channel_id, message)
         if len(self.files):
             self._handle_files_shared()
+        else:
+            self._handle_prompt()
 
     def _handle_files_shared(self):
         """
@@ -135,23 +137,52 @@ class EventHandler:
             self._cleanup(output_filename)
         else:
             send_message(self.channel_id, f"Something went wrong with ImageGeneratorBot :( Image request could not be generated.")
+    
+    def _handle_prompt(self):
+        if not self.inject:
+            self.logger.error("No valid message body.")
+            send_message(self.channel_id, "There must be a body to this message to give the model direction. Try again using --inject followed by a prompt.")
+            return
+        
+        # Name the file for output
+        now = datetime.datetime.now()
+        output_filename = f"image_outputs/gen_image_{now.strftime('%Y-%m-%d-%H-%M-%S')}.png"
+        send_message(self.channel_id, f"Slack Bot will send a file with the name {output_filename.split('/')[-1]} here... :hourglass_flowing_sand:")
 
-    def _handle_image_prompt_and_generation(self, output_filename):
+        if self._handle_image_prompt_and_generation(output_filename, mode="prompt-only") == 200:
+            send_file(self.channel_id, output_filename)
+            self._cleanup(output_filename)
+        else:
+            send_message(self.channel_id, f"Something went wrong with ImageGeneratorBot :( Image request could not be generated.")
+
+        
+    def _handle_image_prompt_and_generation(self, output_filename, mode="image-edit"):
         try:
+            if self.inject:
+                # Inject the clean text into the prompt to help add instructions.
+                self.text = clean_text(self.text)
+            
             # Get the dense prompt
-            generated_prompt = generate_prompt()
+            if mode == "prompt-only":
+                # This will only run if inject is true as it's being handled in the parent function
+                generated_prompt = generate_prompt(mode="inject", injection=self.text)
+            
+            if mode == "image-edit":
+                # Just return the boilerplate prompt
+                generated_prompt = generate_prompt(mode="static")
+                
             self.logger.info("Prompt generated")
             if self.verbose:
                 send_message(self.channel_id, "Seed prompt has been generated:")
                 send_message(self.channel_id, generated_prompt)
 
-            if self.inject:
-                # Inject the clean text into the prompt to help add instructions.
-                self.text = clean_text(self.text)
-                generated_prompt = generated_prompt + self.text
-
             # Make a call to OpenAi image generation model based on the prompt
-            generated_image = generate_image(self.logger, generated_prompt, self.input_filename)
+            if mode == "prompt-only":
+                generated_image = generate_image(self.logger, generated_prompt)
+
+            if mode == "image-edit":
+                generated_image = edit_image(self.logger, generated_prompt, self.input_filename)
+
             if self.verbose: 
                 send_message(self.channel_id, "Image has been generated...")
 
@@ -184,6 +215,7 @@ class EventHandler:
 
         if self.verbose:
             send_message(self.channel_id, "Image has been saved locally. I will try sending it in this channel...")
+
         # Send the output to slack    
         send_file(self.channel_id, output_filename, "Here's your reformatted image!")
 

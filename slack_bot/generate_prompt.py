@@ -2,15 +2,15 @@ import base64
 import os
 import io
 from PIL import Image
-# from dotenv import load_dotenv
-# from openai import OpenAI
+from dotenv import load_dotenv
+from openai import OpenAI
 
 
 __all__ = ["generate_prompt"]
 
-# load_dotenv()
+load_dotenv()
 
-# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Function to encode the image
 def encode_image(image_path):
@@ -20,7 +20,7 @@ def encode_image(image_path):
         resized_img.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-def generate_prompt():
+def generate_prompt(mode="static", injection=""):
     # Getting the Base64 string
     # base64_image = encode_image(image_path)
     
@@ -30,21 +30,24 @@ def generate_prompt():
     The design should be immediately transferrable as printable for a T-Shirt.
     I want just the central design just with a transparent background.
     """
+    if mode == "static": return dense_prompt
 
-    # response = client.responses.create(
-    #     model="gpt-4o",
-    #     input=[
-    #         {
-    #             "role": "user",
-    #             "content": [
-    #                 { "type": "input_text", "text": dense_prompt },
-    #                 {
-    #                     "type": "input_image",
-    #                     "image_url": f"data:image/jpeg;base64,{base64_image}",
-    #                 },
-    #             ],
-    #         }
-    #     ],
-    # ) Deprecated
+    if mode == "inject":
+        dense_prompt = """
+        Add details to this prompt so that it can be used as a prompt for a graphic design. 
+        The design should be immediately transferrable as printable for a T-Shirt.
+        I want just the central design described just with a transparent background.
+        """
+        response = client.responses.create(
+            model="gpt-4o",
+            input=[
+                {
+                    "role": "user",
+                    "content": [
+                        { "type": "input_text", "text": dense_prompt + " " + injection },
+                    ],
+                }
+            ],
+        )
 
-    return dense_prompt
+        return response
