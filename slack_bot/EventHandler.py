@@ -88,7 +88,7 @@ class EventHandler:
                 "I'll handle the rest and create your AI-generated image! :art:"
             )
             send_message(self.channel_id, message)
-        if len(self.files):
+        if self.files:
             self._handle_files_shared()
         else:
             self._handle_prompt()
