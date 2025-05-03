@@ -22,11 +22,14 @@ VALID_FLAGS = {
     "inject"
 }
 
-VALID_CHANNEL = os.getenv("VALID_CHANNEL")
+VALID_CHANNEL_1 = os.getenv("VALID_CHANNEL_1")
+VALID_CHANNEL_2 = os.getenv("VALID_CHANNEL_2")
+
+valid_channels = set({VALID_CHANNEL_1, VALID_CHANNEL_2})
 
 class EventHandler:
     def __init__(self, logger, event_type: str, channel_id: str, user: str, text: str, files: list):
-        if channel_id != VALID_CHANNEL:
+        if channel_id not in valid_channels:
             return 
         
         if event_type not in EVENTS:
