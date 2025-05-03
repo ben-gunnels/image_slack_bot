@@ -166,6 +166,7 @@ class EventHandler:
             if mode == "prompt-only":
                 # This will only run if inject is true as it's being handled in the parent function
                 generated_prompt = generate_prompt(mode="inject", injection=self.text)
+                generated_prompt += " Ensure the image has a transparent background."
             
             if mode == "image-edit":
                 # Just return the boilerplate prompt
