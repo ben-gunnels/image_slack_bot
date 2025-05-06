@@ -4,6 +4,16 @@ from EventHandler import EventHandler
 import logging
 import threading
 
+import base64
+import hmac
+import hashlib
+import requests
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+from dotenv import load_dotenv
+
+load_dotenv()
+
 if os.path.exists("app.log"):
     os.remove("app.log")
 
@@ -18,6 +28,64 @@ logging.basicConfig(
 app = Flask(__name__)
 
 events_of_interest = set({"app_mention"})
+
+# YOUR APP credentials
+APP_ID = os.getenv("APP_ID")
+APP_SECRET = os.getenv("APP_SECRET")
+TEMP_TOKEN = os.getenv("TEMP_TOKEN")
+
+# Decryption function
+def decrypt_secret_key(encrypted_key_b64, secret):
+    encrypted_key = base64.b64decode(encrypted_key_b64)
+    key = hashlib.sha256(secret.encode()).digest()
+    cipher = AES.new(key, AES.MODE_ECB)
+    decrypted = unpad(cipher.decrypt(encrypted_key), AES.block_size)
+    return decrypted.decode()
+
+@app.route('/shein-callback')
+def shein_callback():
+    # Generate signature using HMAC-SHA256
+    token = request.args.get("token")
+    if not token:
+        return "Authorization failed: token not provided", 400
+    message = APP_ID + token
+    signature = hmac.new(APP_SECRET.encode(), message.encode(), hashlib.sha256).hexdigest()
+
+    headers = {
+        "x-lt-signature": signature,
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "appid": APP_ID,
+        "token": token
+    }
+
+    # Call the get-by-token endpoint
+    url = "https://openapi-sem.sheincorp.cn/open-api/auth/get-by-token"
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code != 200:
+        return f"Error from SHEIN API: {response.text}", 500
+
+    data = response.json().get("data", {})
+    open_key_id = data.get("openKeyId")
+    encrypted_secret_key = data.get("secretKey")
+
+    if not open_key_id or not encrypted_secret_key:
+        return "Missing keys in response", 500
+
+    # Decrypt the secret key
+    try:
+        decrypted_secret = decrypt_secret_key(encrypted_secret_key, APP_SECRET)
+    except Exception as e:
+        return f"Decryption failed: {str(e)}", 500
+
+    # Return or process as needed
+    return jsonify({
+        "openKeyId": open_key_id,
+        "secretKey": decrypted_secret
+    })
 
 @app.route("/")
 def hello():
