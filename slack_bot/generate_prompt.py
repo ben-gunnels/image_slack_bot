@@ -28,7 +28,9 @@ def generate_prompt(mode="static", injection=""):
     Recreate the central design of this image.
     The design must be by itself without any of the background context. 
     The design should be immediately transferrable as printable for a T-Shirt.
-    I want just the central design just with a transparent background.
+    I want just the central design with a transparent background.
+    Ensure the design is centered on the canvas with at least 15% transparent margin so nothing is cropped.
+    Transparent background is very important.
     """
     if mode == "static": return dense_prompt
 
@@ -36,8 +38,9 @@ def generate_prompt(mode="static", injection=""):
         dense_prompt = """
         Add details to this prompt so that it can be used as a prompt for a graphic design. 
         The design should be immediately transferrable as printable for a T-Shirt.
-        I want just the central design described just with a transparent background.
-        Ensure the design is fully contained with room around the edges.
+        I want just the central design described with a transparent background.
+        Ensure the design is centered on the canvas with at least 15% transparent margin so nothing is cropped.
+        Transparent background is very important.
         """
         try:
             response = client.responses.create(

@@ -239,7 +239,7 @@ class EventHandler:
         # Remove stored slack image
         if os.path.exists(self.input_filename):
             os.remove(self.input_filename)
-
+   
         if os.path.exists(output_filename):
             os.remove(output_filename)
 
