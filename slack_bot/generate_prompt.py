@@ -37,6 +37,7 @@ def generate_prompt(mode="static", injection=""):
         Add details to this prompt so that it can be used as a prompt for a graphic design. 
         The design should be immediately transferrable as printable for a T-Shirt.
         I want just the central design described just with a transparent background.
+        Ensure the design is fully contained with room around the edges.
         """
         try:
             response = client.responses.create(
