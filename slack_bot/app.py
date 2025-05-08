@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from EventHandler import EventHandler
 import logging
 import threading
-
+import time
 import base64
 import hmac
 import hashlib
@@ -11,6 +11,7 @@ import requests
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from dotenv import load_dotenv
+import hashlib, hmac, base64, json, uuid
 
 load_dotenv()
 
@@ -73,69 +74,40 @@ def shein_callback():
     }
 
     # Call the get-by-token 
-    url = "https://openapi.sheincorp.cn/open-api/auth/v1/get-by-token"
+    # url = "https://openapi.sheincorp.cn/open-api/auth/v1/get-by-token"
 
-    response = requests.post(url, headers=headers)
-    
+    timestamp = str(int(time.time() * 1000))
+    api_path = "/open-api/auth/get-by-token"
+    random_key = str(uuid.uuid4())[:5]
+    random_secret_key = APP_SECRET + random_key
+
+    # Generate Signature
+    sign_string = f"{APP_ID}&{timestamp}&{api_path}"
+    signature = hmac.new(random_secret_key.encode(), sign_string.encode(), hashlib.sha256).digest()
+    base64_signature = base64.b64encode(signature).decode()
+    signature = random_key + base64_signature
+
+    # Set Headers
+    headers = {
+        "Content-Type": "application/json;charset=UTF-8",
+        "x-lt-appid": APP_ID,
+        "x-lt-timestamp": timestamp,
+        "x-lt-signature": signature
+    }
+
+    # Request Body (with tempToken)
+    payload = {
+        token    
+    }
+
+    # Send Request
+    url = "https://openapi-test01.sheincorp.cn/open-api/auth/get-by-token"
+    response = requests.post(url, headers=headers, json=payload)
+
     if response.status_code != 200:
-        print("SHEIN API Error:", response.text)
         return f"Error from SHEIN API: {response.text}", 500
-    
-    else:
-        print("Returned from Shein API")
 
-    data = response.json().get("data", {})
-    open_key_id = data.get("openKeyId")
-    encrypted_secret_key = data.get("secretKey")
-
-    print(data)
-
-    if not open_key_id or not encrypted_secret_key:
-        return "Missing keys in response", 500
-
-    # Decrypt the secret key
-    try:
-        decrypted_secret = decrypt_secret_key(encrypted_secret_key, APP_SECRET)
-        print(decrypted_secret)
-    except Exception as e:
-        return f"Decryption failed: {str(e)}", 500
-
-    # Return or process as needed
-    return jsonify({
-        "openKeyId": open_key_id,
-        "secretKey": decrypted_secret
-    })
-
-@app.route("/")
-def hello():
-    return "Hello from Railway!"
-
-@app.route('/slack/events', methods=['POST'])
-def slack_events():
-    data = request.get_json()
-    
-    # Slack URL verification
-    if data.get("type") == "url_verification":
-        return jsonify({'challenge': data['challenge']})
-
-    # Handle message events
-    # Main event callback handling
-    if data.get("type") == "event_callback":
-        event = data.get("event", {})
-        user = event.get("user")
-        text = event.get("text")
-        event_type = event.get("type")
-        channel_id = event.get("channel")
-        files = event.get("files")
-
-        if event_type in events_of_interest:
-            event_handler = EventHandler(app.logger, event_type, channel_id, user, text, files)
-            app.logger.info(f"{event_type} message from {user}: {text}, channel: {channel_id}")
-
-            # Launch background thread
-            threading.Thread(target=event_handler.handle_event).start()
-
-    return '', 200
+    return jsonify(response.json())
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Default to 5000 if not set
