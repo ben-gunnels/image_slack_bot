@@ -60,32 +60,26 @@ def shein_callback():
     else:
         print("Token acquired.")
 
-    message = APP_ID # + token
-    signature = hmac.new(APP_SECRET.encode(), message.encode(), hashlib.sha256).hexdigest().upper()
-
-    headers = {
-        "x-lt-signature": signature,
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "appid": APP_ID,
-        "token": token
-    }
-
-    # Call the get-by-token 
-    # url = "https://openapi.sheincorp.cn/open-api/auth/v1/get-by-token"
-
+     # Generate timestamp and random key
     timestamp = str(int(time.time() * 1000))
     api_path = "/open-api/auth/get-by-token"
     random_key = str(uuid.uuid4())[:5]
     random_secret_key = APP_SECRET + random_key
 
+    print(f"DEBUG: Generated timestamp: {timestamp}")
+    print(f"DEBUG: Generated random key: {random_key}")
+    print(f"DEBUG: Random secret key: {random_secret_key}")
+
     # Generate Signature
     sign_string = f"{APP_ID}&{timestamp}&{api_path}"
+    print(f"DEBUG: Signature string to be hashed: {sign_string}")
+
     signature = hmac.new(random_secret_key.encode(), sign_string.encode(), hashlib.sha256).digest()
     base64_signature = base64.b64encode(signature).decode()
     signature = random_key + base64_signature
+
+    print(f"DEBUG: Generated HMAC-SHA256 signature: {base64_signature}")
+    print(f"DEBUG: Final signature with random key: {signature}")
 
     # Set Headers
     headers = {
@@ -95,18 +89,32 @@ def shein_callback():
         "x-lt-signature": signature
     }
 
+    print(f"DEBUG: Headers set for the request: {headers}")
+
     # Request Body (with tempToken)
     payload = {
-        token    
+        "tempToken": token
     }
+    print(f"DEBUG: Request payload: {json.dumps(payload)}")
 
     # Send Request
     url = "https://openapi-test01.sheincorp.cn/open-api/auth/get-by-token"
-    response = requests.post(url, headers=headers, json=payload)
+    print(f"INFO: Sending POST request to SHEIN API: {url}")
 
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        print(f"DEBUG: SHEIN API Response status: {response.status_code}")
+        print(f"DEBUG: SHEIN API Response text: {response.text}")
+    except requests.RequestException as e:
+        print(f"ERROR: Error sending request to SHEIN API: {str(e)}")
+        return f"Error connecting to SHEIN API: {str(e)}", 500
+
+    # Handle Response
     if response.status_code != 200:
+        print(f"ERROR: Error from SHEIN API: {response.text}")
         return f"Error from SHEIN API: {response.text}", 500
 
+    print("INFO: Successfully received response from SHEIN API")
     return jsonify(response.json())
 
 if __name__ == "__main__":
