@@ -56,6 +56,8 @@ def shein_callback():
 
     if not token:
         return "Authorization failed: token not provided", 400
+    else:
+        print("Token acquired.")
 
     message = APP_ID + token
     signature = hmac.new(APP_SECRET.encode(), message.encode(), hashlib.sha256).hexdigest()
@@ -70,16 +72,21 @@ def shein_callback():
         "token": token
     }
 
-    # Call the get-by-token endpoint
-    url = "https://openapi-sem.sheincorp.cn/open-api/auth/get-by-token"
+    # Call the get-by-token 
+    url = "https://openapi.sheincorp.cn/open-api/auth/get-by-token"
     response = requests.post(url, json=payload, headers=headers)
     
     if response.status_code != 200:
         return f"Error from SHEIN API: {response.text}", 500
+    
+    else:
+        print("Returned from Shein API")
 
     data = response.json().get("data", {})
     open_key_id = data.get("openKeyId")
     encrypted_secret_key = data.get("secretKey")
+
+    print(data)
 
     if not open_key_id or not encrypted_secret_key:
         return "Missing keys in response", 500
@@ -87,6 +94,7 @@ def shein_callback():
     # Decrypt the secret key
     try:
         decrypted_secret = decrypt_secret_key(encrypted_secret_key, APP_SECRET)
+        print(decrypted_secret)
     except Exception as e:
         return f"Decryption failed: {str(e)}", 500
 
