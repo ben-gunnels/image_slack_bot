@@ -32,7 +32,7 @@ events_of_interest = set({"app_mention"})
 # YOUR APP credentials
 APP_ID = os.getenv("APP_ID")
 APP_SECRET = os.getenv("APP_SECRET")
-# TEMP_TOKEN = os.getenv("TEMP_TOKEN")
+TEMP_TOKEN = os.getenv("TEMP_TOKEN")
 
 # Decryption function
 def decrypt_secret_key(encrypted_key_b64, secret):
@@ -48,9 +48,9 @@ def shein_callback():
     # token = os.getenv("TEMP_TOKEN")
      # 1️⃣ Pull the token directly from the request
     token = (
-        request.args.get("temp_token")                # ?temp_token=...
-        or request.form.get("temp_token")             # form-encoded POST
-        or (request.get_json(silent=True) or {}).get("temp_token")  # JSON body
+        request.args.get("tempToken")                # ?temp_token=...
+        or request.form.get("tempToken")             # form-encoded POST
+        or (request.get_json(silent=True) or {}).get("tempToken")  # JSON body
         or request.headers.get("X-Temp-Token")        # custom header
     )
 
