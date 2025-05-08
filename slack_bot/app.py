@@ -59,7 +59,7 @@ def shein_callback():
     else:
         print("Token acquired.")
 
-    message = APP_ID + token
+    message = APP_ID # + token
     signature = hmac.new(APP_SECRET.encode(), message.encode(), hashlib.sha256).hexdigest().upper()
 
     headers = {
