@@ -45,7 +45,7 @@ def decrypt_secret_key(encrypted_key_b64, secret):
 @app.route('/shein-callback')
 def shein_callback():
     # Generate signature using HMAC-SHA256
-    token = os.environ.get("TEMP_TOKEN")
+    token = os.getenv("TEMP_TOKEN")
     if not token:
         return "Authorization failed: token not provided", 400
     message = APP_ID + token
