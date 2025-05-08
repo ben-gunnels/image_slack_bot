@@ -73,7 +73,7 @@ def shein_callback():
     }
 
     # Call the get-by-token 
-    url = "https://openapi.sheincorp.cn/open-api/auth/get-by-token"
+    url = "https://openapi.sheincorp.com/open-api/auth/get-by-token"
     response = requests.post(url, json=payload, headers=headers)
     
     if response.status_code != 200:
