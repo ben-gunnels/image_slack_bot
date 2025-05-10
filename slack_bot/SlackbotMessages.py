@@ -9,12 +9,12 @@ class SlackBotMessages:
     ImageSaved = "Image has been resized..."
     TrySending = "Image has been saved locally. I will try sending it in this channel..."
 
-    def HelpMessage(user):
+    def HelpMessage(self, user):
         return (f"Hello <@{user}>! :wave:\n\n"
                 "To generate an AI image, please follow these steps:\n"
                 "1. **Mention me** in your message (`@ImageGeneratorBot`).\n"
                 "2. **Attach a valid image file** that I can use as a seed for your prompt.\n\n"
                 "I'll handle the rest and create your AI-generated image! :art:")
 
-    def GeneratorConfirmation(filename):
+    def GeneratorConfirmation(self, filename):
         f"Slack Bot will send a file with the name {filename} here... :hourglass_flowing_sand:"
