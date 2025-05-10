@@ -73,7 +73,7 @@ def shein_callback():
     print(f"DEBUG: Signature string to be hashed: {sign_string}")
 
     # HMAC-SHA256 using the secret key
-    signature = hmac.new(APP_SECRET.encode(), sign_string.encode(), hashlib.sha256).digest()
+    signature = hmac.new(APP_SECRET.encode('utf-8'), sign_string.encode('utf-8'), hashlib.sha256).digest()
     base64_signature = base64.b64encode(signature).decode()
     final_signature = random_code + base64_signature
 
