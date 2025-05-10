@@ -63,19 +63,21 @@ def shein_callback():
    # Generate timestamp and random code
     timestamp = str(int(time.time() * 1000))
     api_path = "/open-api/auth/get-by-token"
-    random_code = str(uuid.uuid4())[:5]
+    random_key = str(uuid.uuid4())[:5]
 
     print(f"DEBUG: Generated timestamp: {timestamp}")
-    print(f"DEBUG: Generated random code: {random_code}")
+    print(f"DEBUG: Generated random code: {random_key}")
 
     # Generate Signature (following the exact order in the UI)
-    sign_string = f"{APP_ID}{APP_SECRET}{api_path}{timestamp}{random_code}"
-    print(f"DEBUG: Signature string to be hashed: {sign_string}")
+    value = f"{APP_ID}&{timestamp}&{api_path}"
+    print(f"DEBUG: Signature string to be hashed: {value}")
+
+    key = f"{APP_SECRET}{random_key}"
 
     # HMAC-SHA256 using the secret key
-    signature = hmac.new(APP_SECRET.encode('utf-8'), sign_string.encode('utf-8'), hashlib.sha256).digest()
-    base64_signature = base64.b64encode(signature).decode()
-    final_signature = random_code + base64_signature
+    signature = hmac.new(key.encode('utf-8'), value.encode('utf-8'), hashlib.sha256).digest().hex()
+    base64_signature = base64.b64encode(signature.encode('utf-8')).decode()
+    final_signature = random_key + base64_signature
 
     print(f"DEBUG: Generated HMAC-SHA256 signature (base64): {base64_signature}")
     print(f"DEBUG: Final signature with random code: {final_signature}")
