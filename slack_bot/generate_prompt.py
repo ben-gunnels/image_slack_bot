@@ -30,7 +30,7 @@ def generate_prompt(mode="image-edit", injection=""):
     The design should be immediately transferrable as printable for a T-Shirt.
     I want just the central design with a transparent background.
     Ensure the design is centered on the canvas with at least 15% transparent margin so nothing is cropped.
-    Transparent background is very important.
+    Transparent background is very important. Zoom out so the entire graphic is visible.
     """
     if mode == "image-edit": return dense_prompt
 
@@ -40,7 +40,7 @@ def generate_prompt(mode="image-edit", injection=""):
         The design should be immediately transferrable as printable for a T-Shirt.
         I want just the central design described with a transparent background.
         Ensure the design is centered on the canvas with at least 15% transparent margin so nothing is cropped.
-        Transparent background is very important.
+        Transparent background is very important. Zoom-out so the entire graphic is visible.
         """
         try:
             response = client.responses.create(
