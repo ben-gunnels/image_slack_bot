@@ -20,7 +20,7 @@ def encode_image(image_path):
         resized_img.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-def generate_prompt(mode="static", injection=""):
+def generate_prompt(mode="image-edit", injection=""):
     # Getting the Base64 string
     # base64_image = encode_image(image_path)
     
@@ -32,9 +32,9 @@ def generate_prompt(mode="static", injection=""):
     Ensure the design is centered on the canvas with at least 15% transparent margin so nothing is cropped.
     Transparent background is very important.
     """
-    if mode == "static": return dense_prompt
+    if mode == "image-edit": return dense_prompt
 
-    if mode == "inject":
+    if mode == "prompt-only":
         dense_prompt = """
         Add details to this prompt so that it can be used as a prompt for a graphic design. 
         The design should be immediately transferrable as printable for a T-Shirt.

@@ -60,33 +60,33 @@ def shein_callback():
     else:
         print("Token acquired.")
 
-     # Generate timestamp and random key
+   # Generate timestamp and random code
     timestamp = str(int(time.time() * 1000))
     api_path = "/open-api/auth/get-by-token"
-    random_key = str(uuid.uuid4())[:5]
-    random_secret_key = APP_SECRET + random_key
+    random_code = str(uuid.uuid4())[:5]
 
     print(f"DEBUG: Generated timestamp: {timestamp}")
-    print(f"DEBUG: Generated random key: {random_key}")
-    print(f"DEBUG: Random secret key: {random_secret_key}")
+    print(f"DEBUG: Generated random code: {random_code}")
 
-    # Generate Signature
-    sign_string = f"{APP_ID}&{timestamp}&{api_path}"
+    # Generate Signature (following the exact order in the UI)
+    sign_string = f"{APP_ID}{APP_SECRET}{api_path}{timestamp}{random_code}"
     print(f"DEBUG: Signature string to be hashed: {sign_string}")
 
-    signature = hmac.new(random_secret_key.encode(), sign_string.encode(), hashlib.sha256).digest()
+    # HMAC-SHA256 using the secret key
+    signature = hmac.new(APP_SECRET.encode(), sign_string.encode(), hashlib.sha256).digest()
     base64_signature = base64.b64encode(signature).decode()
-    signature = random_key + base64_signature
+    final_signature = random_code + base64_signature
 
-    print(f"DEBUG: Generated HMAC-SHA256 signature: {base64_signature}")
-    print(f"DEBUG: Final signature with random key: {signature}")
+    print(f"DEBUG: Generated HMAC-SHA256 signature (base64): {base64_signature}")
+    print(f"DEBUG: Final signature with random code: {final_signature}")
 
     # Set Headers
     headers = {
         "Content-Type": "application/json;charset=UTF-8",
         "x-lt-appid": APP_ID,
         "x-lt-timestamp": timestamp,
-        "x-lt-signature": signature
+        "x-lt-signature": final_signature,
+        "language": "en"
     }
 
     print(f"DEBUG: Headers set for the request: {headers}")
@@ -98,7 +98,7 @@ def shein_callback():
     print(f"DEBUG: Request payload: {json.dumps(payload)}")
 
     # Send Request
-    url = "https://openapi-test01.sheincorp.cn/open-api/auth/get-by-token"
+    url = "https://openapi.sheincorp.cn/open-api/auth/get-by-token"
     print(f"INFO: Sending POST request to SHEIN API: {url}")
 
     try:

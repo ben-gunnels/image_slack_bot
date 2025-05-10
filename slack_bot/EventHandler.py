@@ -1,13 +1,16 @@
 import os
 import datetime
+from dotenv import load_dotenv
 from slack_helper import *
 from generate_prompt import *
 from generate_image import *
 from utils import *
+from SlackbotMessages import SlackBotMessages
 from reformat_image import resize_image
-from dotenv import load_dotenv
 
 load_dotenv()
+
+messages = SlackBotMessages()
 
 EVENTS = {
     "message",
@@ -36,21 +39,22 @@ class EventHandler:
         if event_type not in EVENTS:
             return 
         
-        self.event_type = event_type
+        self.event_type = event_type # app_mention, file_shared, message, etc.
         self.channel_id = channel_id
         
-        self.user = user
-        self.text = text
-        self.files = files
-        self.logger = logger
+        self.user = user # The Slack User ID of the message sender
+        self.text = text # The text body of the slack message
+        self.files = files # Files embedded in the slack message
+        self.logger = logger # Common logging object
 
         # Flags passed by user
-        self.verbose = False
-        self.help = False
-        self.reformat = False
-        self.inject = False
+        self.verbose = False # Gives step by step feedback of the generation process
+        self.help = False # User invokes help instructions from the bot
+        self.reformat = False # User only requires the uploaded image to be reformatted to the appropriate dimensions
+        self.inject = False # Allows the user to add text to the image generation prompt directly
 
         try:
+            # Save memory by removing any existing folder structures from the app
             remove_directory_recursively("user_submitted_files")
             remove_directory_recursively("image_outputs")
         except:
@@ -65,34 +69,20 @@ class EventHandler:
         """
             Delegates the handling of the message to the specified function. 
         """
-        if self.event_type == "message":
-            self._handle_message()
-        elif self.event_type == "app_mention":
+        if self.event_type == "app_mention":
             self.logger.info("Handling app_mention...")
             self._handle_app_mention()
         elif self.event_type == "file_shared":
             self._handle_files_shared()
 
-    def _handle_message(self):
-        """
-            Used to handle vanilla messages sent in the specified slack channel. 
-        """
-        send_message(self.channel_id, f"Hello {self.user} -- from Slack Bot")
-
     def _handle_app_mention(self):
-        if self.help:
-            message = (
-                f"Hello <@{self.user}>! :wave:\n\n"
-                "To generate an AI image, please follow these steps:\n"
-                "1. **Mention me** in your message (`@ImageGeneratorBot`).\n"
-                "2. **Attach a valid image file** that I can use as a seed for your prompt.\n\n"
-                "I'll handle the rest and create your AI-generated image! :art:"
-            )
+        if self.help: # If the help flag is present
+            message = messages.HelpMessage(self.user)
             send_message(self.channel_id, message)
         if self.files:
             self._handle_files_shared()
         else:
-            self._handle_prompt()
+            self._handle_direct_prompt()
 
     def _handle_files_shared(self):
         """
@@ -112,49 +102,66 @@ class EventHandler:
             ext = file.get("filetype").lower()
         else:
             ext = "png"
-        now = datetime.datetime.now()
-        self.input_filename = f"user_submitted_files/{now.strftime('%Y-%m-%d-%H-%M-%S')}.{ext}"
 
-        download_slack_file(file["url_private"], self.input_filename)
-        if self.verbose:
-            send_message(self.channel_id, "Your submitted image has been downloaded...")
+        self._get_file_from_user(file, ext)
 
         if self.reformat:
+            # Just reformat the image and send it
             output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.{ext}"
-            send_message(self.channel_id, f"Slack Bot will send a file with the name {output_filename.split('/')[-1]} here... :hourglass_flowing_sand:")
+            send_message(self.channel_id, messages.GeneratorConfirmation(output_filename.split('/')[-1]))
 
             self._handle_image_reformatting(output_filename)
             self._cleanup()
             return
-
-        output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.png" # Unconditionally set the extension to png if it is being generated
-        send_message(self.channel_id, f"Slack Bot will send a file with the name {output_filename.split('/')[-1]} here... :hourglass_flowing_sand:")
+        
+        # Unconditionally set the extension to png if it is being generated
+        output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.png" 
+        send_message(self.channel_id, messages.GeneratorConfirmation(output_filename.split('/')[-1]))
 
         if self.verbose:
-            send_message(self.channel_id, "I will generate verbose update messages. Keeping you up to date on my task completion.")
+            send_message(self.channel_id, messages.VerboseConfirmation)
 
-        if self._handle_image_prompt_and_generation(output_filename) == 200:
-            send_file(self.channel_id, output_filename)
-            self._cleanup(output_filename)
-        else:
-            send_message(self.channel_id, f"Something went wrong with ImageGeneratorBot :( Image request could not be generated.")
+        self._generate_image_and_send(output_filename)
     
-    def _handle_prompt(self):
+    def _handle_direct_prompt(self):
+        """
+        The function directly takes a prompt as a message and delivers an image directly.
+        It calls the openAiClient.image.generate method.
+        This function requires a body to be given in the message. 
+        """
         if not self.inject:
             self.logger.error("No valid message body.")
-            send_message(self.channel_id, "There must be a body to this message to give the model direction. Try again using --inject followed by a prompt.")
+            send_message(self.channel_id, messages.PromptError)
             return
         
         # Name the file for output
         now = datetime.datetime.now()
         output_filename = f"image_outputs/gen_image_{now.strftime('%Y-%m-%d-%H-%M-%S')}.png"
-        send_message(self.channel_id, f"Slack Bot will send a file with the name {output_filename.split('/')[-1]} here... :hourglass_flowing_sand:")
+        send_message(self.channel_id, messages.GeneratorConfirmation(output_filename.split('/')[-1]))
 
-        if self._handle_image_prompt_and_generation(output_filename, mode="prompt-only") == 200:
+        self._generate_image_and_send(output_filename)
+
+    def _get_file_from_user(self, file, ext):
+        # Name the file that will be saved from the User's message
+        now = datetime.datetime.now()
+        self.input_filename = f"user_submitted_files/{now.strftime('%Y-%m-%d-%H-%M-%S')}.{ext}"
+
+        download_slack_file(file["url_private"], self.input_filename)
+        if self.verbose:
+            send_message(self.channel_id, messages.Download)
+    
+    def _generate_image_and_send(self, output_filename):
+        """
+            Handles the end stage of the image generation process. It makes a call to the image prompter and generator.
+            Handles the resizing and sends the message. 
+            This function acts as an intermediary between the caller and the _handle_image_prompt_and_generation function.
+        
+        """
+        if self._handle_image_prompt_and_generation(output_filename) == 200:
             send_file(self.channel_id, output_filename)
             self._cleanup(output_filename)
         else:
-            send_message(self.channel_id, f"Something went wrong with ImageGeneratorBot :( Image request could not be generated.")
+            send_message(self.channel_id, messages.GeneratorError)
 
         
     def _handle_image_prompt_and_generation(self, output_filename, mode="image-edit"):
@@ -166,16 +173,19 @@ class EventHandler:
             # Get the dense prompt
             if mode == "prompt-only":
                 # This will only run if inject is true as it's being handled in the parent function
-                generated_prompt = generate_prompt(mode="inject", injection=self.text)
+                generated_prompt = generate_prompt(mode="prompt-only", injection=self.text)
                 generated_prompt += " Ensure the image has a transparent background."
             
             if mode == "image-edit":
                 # Just return the boilerplate prompt
-                generated_prompt = generate_prompt(mode="static")
+                if self.inject:
+                    generated_prompt = generate_prompt(mode="image-edit") + self.text
+                else:
+                    generated_prompt = generate_prompt(mode="image-edit")
                 
             self.logger.info("Prompt generated")
             if self.verbose:
-                send_message(self.channel_id, "Seed prompt has been generated:")
+                send_message(self.channel_id, messages.PromptGenerated)
                 send_message(self.channel_id, generated_prompt)
 
             # Make a call to OpenAi image generation model based on the prompt
@@ -186,17 +196,17 @@ class EventHandler:
                 generated_image = edit_image(self.logger, generated_prompt, self.input_filename)
 
             if self.verbose: 
-                send_message(self.channel_id, "Image has been generated...")
+                send_message(self.channel_id, messages.ImageGenerated)
 
             # Reformat the image to proper dimensions and specs
             generated_image = resize_image(generated_image)
             self.logger.info("Image Resized")
             if self.verbose:
-                send_message(self.channel_id, "Image has been resized...")
+                send_message(self.channel_id, messages.ImageResized)
 
             generated_image.save(output_filename, dpi=(300, 300))
             if self.verbose:
-                send_message(self.channel_id, "Image has been saved locally. I will try sending it in this channel...")
+                send_message(self.channel_id, messages.TrySending)
             self.logger.info(f"Generated image saved to {output_filename}")
             return 200
         except Exception:
@@ -216,7 +226,7 @@ class EventHandler:
         resized_image.save(output_filename, dpi=(300, 300))
 
         if self.verbose:
-            send_message(self.channel_id, "Image has been saved locally. I will try sending it in this channel...")
+            send_message(self.channel_id, messages.ImageSaved)
 
         # Send the output to slack    
         send_file(self.channel_id, output_filename, "Here's your reformatted image!")
