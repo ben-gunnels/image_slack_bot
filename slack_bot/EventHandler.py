@@ -96,6 +96,7 @@ class EventHandler:
 
         if self.series: # Returns the list of series params
             self.series_parms = get_series_params(clean_text(self.text))
+            print(self.series_params)
             if not (len(self.series_params[0])):
                 send_message(self.channel_id, messages.SeriesError)
                 return
