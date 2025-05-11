@@ -96,7 +96,7 @@ class EventHandler:
 
         if self.series: # Returns the list of series params
             self.series_params = get_series_params(clean_text(self.text))
-            if not (len(self.series_params[0])):
+            if not (len(self.series_params[0])) or (len(self.files) > 1):
                 send_message(self.channel_id, messages.SeriesError)
                 return
 
@@ -124,9 +124,8 @@ class EventHandler:
         else:
             ext = "png"
 
-        self._get_file_from_user(file, ext)
-
         if self.reformat:
+            self._get_file_from_user(file, ext)
             # Just reformat the image and send it
             output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.{ext}"
             send_message(self.channel_id, messages.GeneratorConfirmation(output_filename.split('/')[-1]))
@@ -138,10 +137,12 @@ class EventHandler:
         # SERIES Handling
         if self.series:
             while self.series_iterator < len(self.series_params[0]):
+                self._get_file_from_user(file, ext)
                 self._facilitate_output(self.input_filename.split('/')[-1][:-4])
                 self.series_iterator += 1
         
         else:
+            self._get_file_from_user(file, ext)
             self._facilitate_output(self.input_filename.split('/')[-1][:-4])
     
     def _handle_direct_prompt(self):

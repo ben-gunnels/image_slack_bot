@@ -10,13 +10,17 @@ class SlackBotMessages:
     # ERRORS
     PromptError = "There must be a flag and a body to this message to give the model direction. Try again using --inject followed by a prompt."
     GeneratorError = "Something went wrong with ImageGeneratorBot :( Image request did not pass the vibe check. Try being less vulgar?"
-    SeriesError = "When using the --series flag you must specify one or more variable arguments. E.g. {1, 2, 3, 4} somewhere in your message"
+    SeriesError = "When using the --series flag you must specify one or more variable arguments. E.g. {1, 2, 3, 4} somewhere in your message. You must also only include a single image or prompt."
 
     def HelpMessage(self, user):
         return (f"Hello <@{user}>! :wave:\n\n"
                 "To generate an AI image, please follow these steps:\n"
                 "1. **Mention me** in your message (`@ImageGeneratorBot`).\n"
                 "2. **Attach a valid image file** that I can use as a seed for your prompt.\n\n"
+                "Some flags that you can add to your message to do exactly what you need:\n"
+                "\t--verbose: Will give you feedback for most of the operations so that you know exactly what I'm doing\n"
+                "\t--inject: Allows you to add a message to your prompt. Just type your message into the box following the flag.\n"
+                "\t--series: Allows you to create a series of images from a single image or prompt\n"
                 "I'll handle the rest and create your AI-generated image! :art:")
 
     def GeneratorConfirmation(self, filename):
