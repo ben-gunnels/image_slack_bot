@@ -22,14 +22,16 @@ VALID_FLAGS = {
     "verbose",
     "help",
     "reformat",
-    "inject"
+    "inject",
+    "series"
 }
 
 VALID_CHANNEL_1 = os.getenv("VALID_CHANNEL_1")
 VALID_CHANNEL_2 = os.getenv("VALID_CHANNEL_2")
 VALID_CHANNEL_3 = os.getenv("VALID_CHANNEL_3")
+VALID_CHANNEL_4 = os.getenv("VALID_CHANNEL_4")
 
-valid_channels = set({VALID_CHANNEL_1, VALID_CHANNEL_2, VALID_CHANNEL_3})
+valid_channels = set({VALID_CHANNEL_1, VALID_CHANNEL_2, VALID_CHANNEL_3, VALID_CHANNEL_4})
 
 class EventHandler:
     def __init__(self, logger, event_type: str, channel_id: str, user: str, text: str, files: list):
@@ -52,6 +54,11 @@ class EventHandler:
         self.help = False # User invokes help instructions from the bot
         self.reformat = False # User only requires the uploaded image to be reformatted to the appropriate dimensions
         self.inject = False # Allows the user to add text to the image generation prompt directly
+        self.series = False # Allows the user to enter iterative arguments to create a batch from one image or prompt. 
+        
+        # Series Attributes
+        self.series_params = None
+        self.series_iterator = 0
 
         try:
             # Save memory by removing any existing folder structures from the app
@@ -86,6 +93,13 @@ class EventHandler:
         if self.help: # If the help flag is present
             message = messages.HelpMessage(self.user)
             send_message(self.channel_id, message)
+
+        if self.series: # Returns the list of series params
+            self.series_parms = get_series_params(clean_text(self.text))
+            if not self.series_params:
+                send_message(self.channel_id, messages.SeriesError)
+                return
+
         if self.files:
             self._handle_files_shared()
         else:
@@ -121,14 +135,14 @@ class EventHandler:
             self._cleanup()
             return
         
-        # Unconditionally set the extension to png if it is being generated
-        output_filename = f"image_outputs/gen_image_{self.input_filename.split('/')[-1][:-4]}.png" 
-        send_message(self.channel_id, messages.GeneratorConfirmation(output_filename.split('/')[-1]))
-
-        if self.verbose:
-            send_message(self.channel_id, messages.VerboseConfirmation)
-
-        self._generate_image_and_send(output_filename)
+        # SERIES Handling
+        if self.series:
+            while self.series_iterator < len(self.series_params[0]):
+                self._facilitate_output(self.input_filename.split('/')[-1][:-4])
+                self.series_iterator += 1
+        
+        else:
+            self._facilitate_output(self.input_filename.split('/')[-1][:-4])
     
     def _handle_direct_prompt(self):
         """
@@ -141,10 +155,30 @@ class EventHandler:
             send_message(self.channel_id, messages.PromptError)
             return
         
-        # Name the file for output
-        now = datetime.datetime.now()
-        output_filename = f"image_outputs/gen_image_{now.strftime('%Y-%m-%d-%H-%M-%S')}.png"
+        # SERIES Handling
+        if self.series:
+            while self.series_iterator < len(self.series_params[0]):
+                # Name the file for output
+                now = datetime.datetime.now()
+                self._facilitate_output(now.strftime('%Y-%m-%d-%H-%M-%S'))
+                self.series_iterator += 1
+
+        else:
+            # Name the file for output
+            now = datetime.datetime.now()
+            self._facilitate_output(now.strftime('%Y-%m-%d-%H-%M-%S'))
+
+    def _facilitate_output(self, input_filename):
+        """
+            Handles the naming of the output file, sending confirmation messages.
+            Calls the generate image and send function. 
+        """
+        # Unconditionally set the extension to png if it is being generated
+        output_filename = f"image_outputs/gen_image_{input_filename}.png" 
         send_message(self.channel_id, messages.GeneratorConfirmation(output_filename.split('/')[-1]))
+
+        if self.verbose:
+            send_message(self.channel_id, messages.VerboseConfirmation)
 
         self._generate_image_and_send(output_filename)
 
@@ -209,20 +243,33 @@ class EventHandler:
             print(f"Image generation could not be completed.")
 
     def _generate_prompt(self, mode):
+        """
+            Create the prompt needed to generate the image. 
+            Handles the case where a vanilla prompt is entered and when an Image is being edited. 
+        
+        """
         if self.inject:
-                # Inject the clean text into the prompt to help add instructions.
-                self.text = clean_text(self.text)
+            # Inject the clean text into the prompt to help add instructions.
+            text = clean_text(self.text)
+
+            # SERIES Handling
+            if self.series:
+                series_replacements = get_series(self.text)
+
+                for i, s in enumerate(series_replacements):
+                    # Replace the series arguments with the current argument via the iterator.
+                    text = text.replace(s, self.series_params[i][self.series_iterator])
             
         # Get the dense prompt
         if mode == "prompt-only":
             # This will only run if inject is true as it's being handled in the parent function
-            generated_prompt = generate_prompt(mode="prompt-only", injection=self.text)
+            generated_prompt = generate_prompt(mode="prompt-only", injection=text)
             generated_prompt += " Ensure the image has a transparent background."
         
         if mode == "image-edit":
             # Just return the boilerplate prompt
             if self.inject:
-                generated_prompt = generate_prompt(mode="image-edit") + self.text
+                generated_prompt = generate_prompt(mode="image-edit") + text
             else:
                 generated_prompt = generate_prompt(mode="image-edit")
 
@@ -234,6 +281,9 @@ class EventHandler:
         return generated_prompt
     
     def _generate_image(self, mode, generated_prompt):
+        """
+            Makes the call to generate the image based on whether the mode is prompt-only or image-edit. 
+        """
         # Make a call to OpenAi image generation model based on the prompt
         if mode == "prompt-only":
             generated_image = generate_image(self.logger, generated_prompt)

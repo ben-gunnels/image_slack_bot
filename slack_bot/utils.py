@@ -33,3 +33,35 @@ def clean_text(text):
     text = text.strip()
 
     return text
+
+def get_series(text):
+    """
+        Gets the series literals and returns them in a list.
+    """
+    series = list(re.findall(r"\{.*?\}", text))
+    return series
+
+
+def get_series_params(text):
+    """
+        Returns a 2D list of parameters for the image generator prompt.
+        The index of the inner list signifies the relative location of a series variable in the injection.
+        E.g.
+            text = 'Replace the number with {1, 2, 3, 4} and the fruit with {orange, grape, apple, banana}
+            returns [[1, 2, 3, 4], [orange, grape, apple, banana]]
+    """
+    series_params = []
+    series = list(re.findall(r"\{(.*?)\}", text))
+
+    if not series:   
+        return None
+    
+    for s in series:
+        series_params.append([c.strip() for c in s.split(",")])
+
+    length_counts = {len(s) for s in series_params}
+
+    if len(length_counts) != 1: # Invalid, all arguments must be the same length
+        return None
+
+    return series_params

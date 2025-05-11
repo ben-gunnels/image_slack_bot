@@ -10,3 +10,5 @@ clean.py
 __pycache__
 
 .env
+
+Test.ipynb
