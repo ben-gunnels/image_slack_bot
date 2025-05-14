@@ -73,11 +73,12 @@ class EventHandler:
 
         self._set_flags()
 
+        print(self.event_type)
+
     def handle_event(self):
         """
             Delegates the handling of the message to the specified function. 
         """
-        print(self.event_type)
         if self.event_type == "app_mention":
             self.logger.info("Handling app_mention...")
             self._handle_app_mention()
