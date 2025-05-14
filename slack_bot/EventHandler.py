@@ -1,10 +1,11 @@
 import os
 import datetime
-from dotenv import load_dotenv
 from slack_helper import *
 from generate_prompt import *
 from generate_image import *
 from utils import *
+from archiver import *
+from vars import *
 from SlackbotMessages import SlackBotMessages
 from reformat_image import resize_image
 from dropbox_helper import upload_to_shared_folder
@@ -24,15 +25,11 @@ VALID_FLAGS = {
     "help",
     "reformat",
     "inject",
-    "series"
+    "series",
+    "archive"
 }
 
-VALID_CHANNEL_1 = os.getenv("VALID_CHANNEL_1")
-VALID_CHANNEL_2 = os.getenv("VALID_CHANNEL_2")
-VALID_CHANNEL_3 = os.getenv("VALID_CHANNEL_3")
-VALID_CHANNEL_4 = os.getenv("VALID_CHANNEL_4")
-
-valid_channels = set({VALID_CHANNEL_1, VALID_CHANNEL_2, VALID_CHANNEL_3, VALID_CHANNEL_4})
+valid_channels = set(CHANNEL_MAP.keys())
 
 class EventHandler:
     def __init__(self, logger, event_type: str, channel_id: str, user: str, text: str, files: list):
@@ -59,7 +56,8 @@ class EventHandler:
         self.reformat = False # User only requires the uploaded image to be reformatted to the appropriate dimensions
         self.inject = False # Allows the user to add text to the image generation prompt directly
         self.series = False # Allows the user to enter iterative arguments to create a batch from one image or prompt. 
-        
+        self.archive = False
+
         # Series Attributes
         self.series_params = None
         self.series_iterator = 0
@@ -84,7 +82,7 @@ class EventHandler:
             self.logger.info("Handling app_mention...")
             self._handle_app_mention()
         elif self.event_type == "file_shared":
-            self._handle_files_shared()
+            self._handle_files_shared()    
 
     def _handle_app_mention(self):
         """
@@ -97,6 +95,12 @@ class EventHandler:
         if self.help: # If the help flag is present
             message = messages.HelpMessage(self.user)
             send_message(self.channel_id, message)
+
+        if self.archive:
+            pass
+        
+        else: # Temporary block
+            return
 
         if self.series: # Returns the list of series params
             self.series_params = get_series_params(clean_text(self.text))
