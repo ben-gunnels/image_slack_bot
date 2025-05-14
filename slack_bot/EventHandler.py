@@ -96,7 +96,7 @@ class EventHandler:
         if self.help: # If the help flag is present
             message = messages.HelpMessage(self.user)
             send_message(self.channel_id, message)
-        print("Archive " + self.archive)
+        print(f"Archive {self.archive}")
         if self.archive:
             self._handle_archive()
         
