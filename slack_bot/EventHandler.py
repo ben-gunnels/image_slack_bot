@@ -34,8 +34,6 @@ class EventHandler:
     def __init__(self, logger, event_type: str, channel_id: str, user: str, text: str, files: list):
         if channel_id not in valid_channels:
             return 
-
-        print("Channel id is valid")
         
         if event_type not in EVENTS:
             return 
@@ -81,6 +79,7 @@ class EventHandler:
         """
         if self.event_type == "app_mention":
             self.logger.info("Handling app_mention...")
+            print("Handling app mention...")
             self._handle_app_mention()
         elif self.event_type == "file_shared":
             self._handle_files_shared()    
