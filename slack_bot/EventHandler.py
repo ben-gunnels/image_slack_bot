@@ -32,6 +32,8 @@ valid_channels = set(CHANNEL_MAP.keys())
 
 class EventHandler:
     def __init__(self, logger, event_type: str, channel_id: str, user: str, text: str, files: list):
+        print(channel_id)
+        print(valid_channels)
         if channel_id not in valid_channels:
             return 
         
