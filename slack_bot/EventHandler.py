@@ -7,6 +7,7 @@ from generate_image import *
 from utils import *
 from SlackbotMessages import SlackBotMessages
 from reformat_image import resize_image
+from dropbox_helper import upload_to_shared_folder
 
 load_dotenv()
 
@@ -99,13 +100,13 @@ class EventHandler:
 
         if self.series: # Returns the list of series params
             self.series_params = get_series_params(clean_text(self.text))
-            if not (len(self.series_params[0])) or (len(self.files) > 1):
+            if not (len(self.series_params[0])) or (len(self.files) > 1): # The series must contain parameters and only 1 file
                 send_message(self.channel_id, messages.SeriesError)
                 return
 
-        if self.files:
+        if self.files: # The user has submitted a file to be edited
             self._handle_files_shared()
-        else:
+        else: # The user has not submitted a file to be edited
             self._handle_direct_prompt()
 
     def _handle_files_shared(self):
@@ -321,8 +322,18 @@ class EventHandler:
         if self.verbose:
             send_message(self.channel_id, messages.ImageSaved)
 
+        # Send the output to dropbox
+        send_message(self.channel_id, messages.AttemptingDropbox)
+        try:    
+            upload_to_shared_folder(output_filename)
+        except Exception as e:
+            send_message(self.channel_id, messages.DropboxUploadError(e))
+
+        send_message(self.channel_id, messages.DropboxSuccessful)
+
         # Send the output to slack    
         send_file(self.channel_id, output_filename, "Here's your reformatted image!")
+
 
     def _mkdirs(self, folder_path):
         """
