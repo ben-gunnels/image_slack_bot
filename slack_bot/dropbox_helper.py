@@ -11,7 +11,14 @@ DROPBOX_ACCESS_TOKEN = os.getenv("DROPBOX_ACCESS_TOKEN")
 USER_ID = os.getenv("DROPBOX_USER_ID")
 SHARED_FOLDER_ID = os.getenv("SHARED_FOLDER_ID")
 
-def upload_to_shared_folder(file):
+def upload_to_shared_folder(file_path: str):
+    """
+        Uploads a given file path to a shared dropbox folder. 
+        The function must be supplied a known file ID and user id to perform this request. 
+    """
+    # Convert file path to a Path object
+    file = pathlib.Path(file_path)
+    
     if not file.exists():
         return {"error": "File does not exist"}
 
