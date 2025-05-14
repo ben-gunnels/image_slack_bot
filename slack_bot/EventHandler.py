@@ -77,9 +77,9 @@ class EventHandler:
         """
             Delegates the handling of the message to the specified function. 
         """
+        print(self.event_type)
         if self.event_type == "app_mention":
             self.logger.info("Handling app_mention...")
-            print("Handling app mention...")
             self._handle_app_mention()
         elif self.event_type == "file_shared":
             self._handle_files_shared()    
