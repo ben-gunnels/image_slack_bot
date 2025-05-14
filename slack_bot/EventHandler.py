@@ -102,9 +102,9 @@ class EventHandler:
         print(f"Archive {self.archive}")
         if self.archive:
             self._handle_archive()
-        
-        else: # Temporary block
             return
+        
+        return
 
         if self.series: # Returns the list of series params
             self.series_params = get_series_params(clean_text(self.text))
