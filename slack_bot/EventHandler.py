@@ -9,6 +9,7 @@ from vars import *
 from SlackbotMessages import SlackBotMessages
 from reformat_image import resize_image
 from dropbox_helper import upload_to_shared_folder
+from archiver import list_files_in_channel
 
 messages = SlackBotMessages()
 
@@ -95,7 +96,7 @@ class EventHandler:
             send_message(self.channel_id, message)
 
         if self.archive:
-            pass
+            self._handle_archive()
         
         else: # Temporary block
             return
@@ -177,6 +178,22 @@ class EventHandler:
             # Name the file for output
             now = datetime.datetime.now()
             self._facilitate_output(now.strftime('%Y-%m-%d-%H-%M-%S'))
+
+    def _handle_archive(self):
+        """
+            Archives the image files sent by slack box and sends them to the dropbox folder 
+            corresponding to the current channel.
+            Downloads the image to the image_outputs folder and then tries uploading to dropbox.
+        """
+        files = list_files_in_channel(self.channel_id)
+
+        for file in files:
+            filename = "image_outputs/" + file.get('name', 'error.png')
+            url = file.get('url_private', '')
+            if url:
+                download_slack_file(url, filename)
+                upload_to_shared_folder(filename, self.dropbox_folder_id)
+                self._cleanup(filename)
 
     def _facilitate_output(self, input_filename):
         """

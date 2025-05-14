@@ -49,7 +49,7 @@ def upload_to_shared_folder(file_path: str, folder_id):
 
     print("Uploading to Dropbox Shared Folder...")
     print(f"User ID: {USER_ID}")
-    print(f"Shared Folder ID: {SHARED_FOLDER_ID}")
+    print(f"Shared Folder ID: {folder_id}")
     print(f"Dropbox Path: {dropbox_path}")
 
     try:
