@@ -15,7 +15,7 @@ class SlackBotMessages:
     GeneratorError = "Something went wrong with ImageGeneratorBot :( Image request did not pass the vibe check. Try being less vulgar?"
     SeriesError = "When using the --series flag you must specify one or more variable arguments. E.g. {1, 2, 3, 4} somewhere in your message. You must also only include a single image or prompt."
     
-    def DropboxUploadError(e):
+    def DropboxUploadError(self, e):
        return f"There was an error uploading to Dropbox: {e}"
 
     def HelpMessage(self, user):
