@@ -41,6 +41,7 @@ class EventHandler:
         
         self.event_type = event_type # app_mention, file_shared, message, etc.
         self.channel_id = channel_id
+        self.input_name = None
 
         self.dropbox_folder_id = CHANNEL_MAP[channel_id]
         
@@ -197,7 +198,6 @@ class EventHandler:
                 download_slack_file(url, filename)
                 upload_to_shared_folder(filename, self.dropbox_folder_id)
                 send_message(self.channel_id, filename + " " + messages.DropboxSuccessful)
-                self._cleanup(filename)
 
     def _facilitate_output(self, input_filename):
         """
