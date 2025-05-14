@@ -75,8 +75,6 @@ class EventHandler:
 
         self._set_flags()
 
-        print(self.event_type)
-
     def handle_event(self):
         """
             Delegates the handling of the message to the specified function. 
@@ -98,7 +96,7 @@ class EventHandler:
         if self.help: # If the help flag is present
             message = messages.HelpMessage(self.user)
             send_message(self.channel_id, message)
-
+        print("Archive " + self.archive)
         if self.archive:
             self._handle_archive()
         
