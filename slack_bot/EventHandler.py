@@ -185,6 +185,7 @@ class EventHandler:
             corresponding to the current channel.
             Downloads the image to the image_outputs folder and then tries uploading to dropbox.
         """
+        send_message(self.channel_id, messages.ArchiveConfirmation)
         files = list_files_in_channel(self.channel_id)
 
         for file in files:
@@ -193,6 +194,7 @@ class EventHandler:
             if url:
                 download_slack_file(url, filename)
                 upload_to_shared_folder(filename, self.dropbox_folder_id)
+                send_message(self.channel_id, filename + " " + messages.DropboxSuccessful)
                 self._cleanup(filename)
 
     def _facilitate_output(self, input_filename):

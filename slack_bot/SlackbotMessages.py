@@ -1,5 +1,6 @@
 class SlackBotMessages:
     VerboseConfirmation = "I will generate verbose update messages. Keeping you up to date on my task completion."
+    ArchiveConfirmation = "I will try uploading the files in this channel to the folder in DropBox"
     Download = "Your submitted image has been downloaded..."
     PromptGenerated = "Seed prompt has been generated:"
     ImageGenerated = "Image has been generated..."
