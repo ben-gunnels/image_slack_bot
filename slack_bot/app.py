@@ -123,7 +123,7 @@ def shein_callback():
 def hello():
     return "Hello from Railway!"
 
-@app.route('/slack/events', methods=['POST'])
+@app.route('/slack/events', methods=['POST', 'GET'])
 def slack_events():
     data = request.get_json()
     
