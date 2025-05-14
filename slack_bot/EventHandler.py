@@ -10,8 +10,6 @@ from SlackbotMessages import SlackBotMessages
 from reformat_image import resize_image
 from dropbox_helper import upload_to_shared_folder
 
-load_dotenv()
-
 messages = SlackBotMessages()
 
 EVENTS = {
@@ -41,6 +39,7 @@ class EventHandler:
         
         self.event_type = event_type # app_mention, file_shared, message, etc.
         self.channel_id = channel_id
+        self.dropbox_folder_id = valid_channels[channel_id]
         
         self.user = user # The Slack User ID of the message sender
         self.text = text # The text body of the slack message
@@ -48,7 +47,6 @@ class EventHandler:
         self.logger = logger # Common logging object
 
         self.mode = None # image-edit, prompt-only
-
 
         # Flags passed by user
         self.verbose = False # Gives step by step feedback of the generation process
@@ -219,7 +217,7 @@ class EventHandler:
             # Send the output to dropbox
             send_message(self.channel_id, messages.AttemptingDropbox)
             try:    
-                upload_to_shared_folder(output_filename)
+                upload_to_shared_folder(output_filename, self.dropbox_folder_id)
             except Exception as e:
                 send_message(self.channel_id, messages.DropboxUploadError(e))
 
@@ -337,7 +335,7 @@ class EventHandler:
         # Send the output to dropbox
         send_message(self.channel_id, messages.AttemptingDropbox)
         try:    
-            upload_to_shared_folder(output_filename)
+            upload_to_shared_folder(output_filename, self.dropbox_folder_id)
         except Exception as e:
             send_message(self.channel_id, messages.DropboxUploadError(e))
 

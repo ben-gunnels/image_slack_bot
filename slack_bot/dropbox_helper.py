@@ -9,9 +9,8 @@ load_dotenv()
 
 DROPBOX_ACCESS_TOKEN = os.getenv("DROPBOX_ACCESS_TOKEN")
 USER_ID = os.getenv("DROPBOX_USER_ID")
-SHARED_FOLDER_ID = os.getenv("SHARED_FOLDER_ID")
 
-def upload_to_shared_folder(file_path: str):
+def upload_to_shared_folder(file_path: str, folder_id):
     """
         Uploads a given file path to a shared dropbox folder. 
         The function must be supplied a known file ID and user id to perform this request. 
@@ -37,7 +36,7 @@ def upload_to_shared_folder(file_path: str):
         "Dropbox-API-Select-User": USER_ID,
         "Dropbox-API-Path-Root": json.dumps({
             ".tag": "namespace_id",
-            "namespace_id": SHARED_FOLDER_ID
+            "namespace_id": folder_id
         }),
         "Content-Type": "application/octet-stream",
         "Dropbox-API-Arg": json.dumps({
