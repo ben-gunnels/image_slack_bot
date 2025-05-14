@@ -28,6 +28,7 @@ VALID_FLAGS = {
     "archive"
 }
 
+
 valid_channels = set(CHANNEL_MAP.keys())
 
 class EventHandler:
@@ -40,7 +41,8 @@ class EventHandler:
         
         self.event_type = event_type # app_mention, file_shared, message, etc.
         self.channel_id = channel_id
-        self.dropbox_folder_id = valid_channels[channel_id]
+
+        self.dropbox_folder_id = CHANNEL_MAP[channel_id]
         
         self.user = user # The Slack User ID of the message sender
         self.text = text # The text body of the slack message
