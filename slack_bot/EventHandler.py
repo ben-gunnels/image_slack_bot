@@ -198,8 +198,9 @@ class EventHandler:
             url = file.get('url_private', '')
             if url:
                 download_slack_file(url, filename)
-                upload_to_shared_folder(filename, self.dropbox_folder_id)
-                send_message(self.channel_id, filename + " " + messages.DropboxSuccessful)
+                response = upload_to_shared_folder(filename, self.dropbox_folder_id)
+                if not (response.get("error")):
+                    send_message(self.channel_id, messages.DropboxSuccessful)
 
     def _facilitate_output(self, input_filename):
         """
