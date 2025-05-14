@@ -49,6 +49,9 @@ class EventHandler:
         self.files = files # Files embedded in the slack message
         self.logger = logger # Common logging object
 
+        self.mode = None # image-edit, prompt-only
+
+
         # Flags passed by user
         self.verbose = False # Gives step by step feedback of the generation process
         self.help = False # User invokes help instructions from the bot
@@ -109,6 +112,7 @@ class EventHandler:
         """
             Sends each file in the batch off to be handled by the file handler.
         """
+        self.mode = "image-only"
         for file in self.files:
             self._handle_file_shared(file)
         return
@@ -155,6 +159,8 @@ class EventHandler:
             self.logger.error("No valid message body.")
             send_message(self.channel_id, messages.PromptError)
             return
+        
+        self.mode = "prompt-only"
         
         # SERIES Handling
         if self.series:
@@ -207,11 +213,9 @@ class EventHandler:
         if self._handle_image_prompt_and_generation(output_filename) == 200:
             send_file(self.channel_id, output_filename)
             self._cleanup(output_filename)
-        else:
-            send_message(self.channel_id, messages.GeneratorError)
 
         
-    def _handle_image_prompt_and_generation(self, output_filename, mode="image-edit"):
+    def _handle_image_prompt_and_generation(self, output_filename):
         """"
             Generates the image prompt and the generation of an Ai generated image.
             It handles the cases of prompt-only and image-edit.
@@ -221,9 +225,9 @@ class EventHandler:
                     to try to edit the given image and return a suitable design.
         """
         try:
-            generated_prompt = self._generate_prompt(mode)
+            generated_prompt = self._generate_prompt(self.mode)
 
-            generated_image = self._generate_image(mode, generated_prompt)
+            generated_image = self._generate_image(self.mode, generated_prompt)
 
             # Reformat the image to proper dimensions and specs
             generated_image = resize_image(generated_image)

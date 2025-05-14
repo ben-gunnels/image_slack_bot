@@ -24,4 +24,4 @@ class SlackBotMessages:
                 "I'll handle the rest and create your AI-generated image! :art:")
 
     def GeneratorConfirmation(self, filename):
-        f"Slack Bot will send a file with the name {filename} here... :hourglass_flowing_sand:"
+        return f"Slack Bot will send a file with the name {filename} here... :hourglass_flowing_sand:"
