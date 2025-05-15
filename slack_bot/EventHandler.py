@@ -190,6 +190,7 @@ class EventHandler:
             corresponding to the current channel.
             Downloads the image to the image_outputs folder and then tries uploading to dropbox.
         """
+        successes = 0
         send_message(self.channel_id, messages.ArchiveConfirmation)
         files = list_files_in_channel(self.channel_id)
 
@@ -200,9 +201,12 @@ class EventHandler:
                 download_slack_file(url, filename)
                 response = upload_to_shared_folder(filename, self.dropbox_folder_id)
                 if (response.get("error")):
-                    send_message(self.channel_id, messages.DropboxError)
+                    pass
                 else:
-                    send_message(self.channel_id, messages.DropboxSuccessful)
+                    successes += 1
+                    
+        if successes == len(files):
+            send_message(self.channel_id, messages.DropboxSuccessful + " for all files in batch.")
                 
 
     def _facilitate_output(self, input_filename):
