@@ -47,14 +47,14 @@ def upload_to_shared_folder(file_path: str, folder_id):
         })
     }
 
-    print("Uploading to Dropbox Shared Folder...")
-    print(f"User ID: {USER_ID}")
-    print(f"Shared Folder ID: {folder_id}")
-    print(f"Dropbox Path: {dropbox_path}")
+    # print("Uploading to Dropbox Shared Folder...")
+    # print(f"User ID: {USER_ID}")
+    # print(f"Shared Folder ID: {folder_id}")
+    # print(f"Dropbox Path: {dropbox_path}")
 
     try:
         response = requests.post(url, headers=headers, data=file_content)
-        print(f"Response Status: {response.status_code}")
+        # print(f"Response Status: {response.status_code}")
         print(f"Response Text: {response.text}")
         response.raise_for_status()  # This will raise an error for non-200 responses
         return {"message": "File uploaded successfully", "dropbox_path": dropbox_path}
