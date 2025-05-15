@@ -116,7 +116,7 @@ class EventHandler:
         """
             Sends each file in the batch off to be handled by the file handler.
         """
-        self.mode = "image-only"
+        self.mode = "image-edit"
         for file in self.files:
             self._handle_file_shared(file)
         return
