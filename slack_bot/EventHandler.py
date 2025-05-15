@@ -313,6 +313,7 @@ class EventHandler:
             if self.inject:
                 generated_prompt = generate_prompt(mode="image-edit") + text
             else:
+                print("generating prompt...")
                 generated_prompt = generate_prompt(mode="image-edit")
 
         self.logger.info("Prompt generated")
