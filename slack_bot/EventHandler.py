@@ -40,7 +40,7 @@ class EventHandler:
         
         self.event_type = event_type # app_mention, file_shared, message, etc.
         self.channel_id = channel_id
-        self.input_name = None
+        self.input_filename = None
 
         self.dropbox_folder_id = CHANNEL_MAP[channel_id]
         
@@ -280,9 +280,9 @@ class EventHandler:
 
             return 200
         
-        except Exception:
+        except Exception as e:
             send_message(self.channel_id, messages.GeneratorError)
-            print(f"Image generation could not be completed.")
+            print(f"Image generation could not be completed. {e}")
 
     def _generate_prompt(self, mode):
         """
