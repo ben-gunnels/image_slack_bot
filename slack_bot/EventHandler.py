@@ -43,9 +43,6 @@ class EventHandler:
         self.input_name = None
 
         self.dropbox_folder_id = CHANNEL_MAP[channel_id]
-
-        print(CHANNEL_MAP)
-        print(self.dropbox_folder_id)
         
         self.user = user # The Slack User ID of the message sender
         self.text = text # The text body of the slack message
@@ -60,7 +57,8 @@ class EventHandler:
         self.reformat = False # User only requires the uploaded image to be reformatted to the appropriate dimensions
         self.inject = False # Allows the user to add text to the image generation prompt directly
         self.series = False # Allows the user to enter iterative arguments to create a batch from one image or prompt. 
-        self.archive = False
+        self.archive = False # Will prompt the bot to output all of the generated files to Dropbox
+        self.allow_archive = False # This parameter must be manually changed to True to allow archiving
 
         # Series Attributes
         self.series_params = None
@@ -99,13 +97,10 @@ class EventHandler:
         if self.help: # If the help flag is present
             message = messages.HelpMessage(self.user)
             send_message(self.channel_id, message)
-        print(f"Archive {self.archive}")
-        if self.archive:
-            self._handle_archive()
-            return
-        
-        return
 
+        if self.archive and self.allow_archive:
+            self._handle_archive()
+            
         if self.series: # Returns the list of series params
             self.series_params = get_series_params(clean_text(self.text))
             if not (len(self.series_params[0])) or (len(self.files) > 1): # The series must contain parameters and only 1 file
