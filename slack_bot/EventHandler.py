@@ -115,6 +115,7 @@ class EventHandler:
     def _handle_files_shared(self):
         """
             Sends each file in the batch off to be handled by the file handler.
+            Treats a batch continuously.
         """
         self.mode = "image-edit"
         for file in self.files:
