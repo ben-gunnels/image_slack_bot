@@ -15,6 +15,9 @@ DROPBOX_3 = str(os.getenv("DROPBOX_3"))
 VALID_CHANNEL_4 = os.getenv("VALID_CHANNEL_4")
 DROPBOX_4 = str(os.getenv("DROPBOX_4"))
 
+VALID_CHANNEL_5 = os.getenv("VALID_CHANNEL_5")
+DROPBOX_5 = str(os.getenv("DROPBOX_5"))
+
 CHANNEL_MAP = {
     VALID_CHANNEL_1: DROPBOX_1,
     VALID_CHANNEL_2: DROPBOX_2,

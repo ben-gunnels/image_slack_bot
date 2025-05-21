@@ -25,9 +25,9 @@ def list_shared_folders_for_user():
     else:
         print("Failed to list shared folders:", response.text)
         return None
+    
 
 # Example usage
-user_id = "USER_ID_FROM_TEAM_MEMBERS_LIST"
 shared_folders = list_shared_folders_for_user()
 if shared_folders:
     print("Shared Folders for Selected User:")
