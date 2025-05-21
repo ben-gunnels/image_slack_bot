@@ -28,7 +28,8 @@ def generate_prompt(mode="image-edit", injection=""):
     Recreate the central design of this image.
     The design must be by itself without any of the background context. 
     The design should be immediately transferrable as printable for a T-Shirt.
-    I want just the central design with a transparent background.
+    I want the central design with a transparent background.
+    If there is text in the image recreate the text.
     Ensure the design is centered on the canvas with at least 15% transparent margin so nothing is cropped.
     Transparent background is very important. Zoom out so the entire graphic is visible.
     """
