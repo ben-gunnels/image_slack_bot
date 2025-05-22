@@ -143,7 +143,11 @@ def slack_events():
         channel_id = event.get("channel")
         files = event.get("files")
 
-        
+        print(user)
+        print(text)
+        print(event_type)
+        print(channel_id)
+        print(len(files))
 
         if event_type in events_of_interest:
             event_handler = EventHandler(app.logger, event_type, channel_id, user, text, files)
