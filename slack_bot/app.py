@@ -133,17 +133,15 @@ def slack_events():
 
     # Handle message events
     # Main event callback handling
-
     print(data)
     if data.get("type") == "event_callback":
+        print("event_callback triggered")
         event = data.get("event", {})
         user = event.get("user")
         text = event.get("text")
         event_type = event.get("type")
         channel_id = event.get("channel")
         files = event.get("files")
-
-        print(data)
 
         if event_type in events_of_interest:
             event_handler = EventHandler(app.logger, event_type, channel_id, user, text, files)
