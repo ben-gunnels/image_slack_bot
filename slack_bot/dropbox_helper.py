@@ -1,14 +1,40 @@
-import requests
 import os
 import pathlib
-from dotenv import load_dotenv
+import pathlib
+import requests
 import json
+import base64
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-DROPBOX_ACCESS_TOKEN = os.getenv("DROPBOX_ACCESS_TOKEN")
+APP_KEY = os.getenv("DROPBOX_APP_KEY")
+APP_SECRET = os.getenv("DROPBOX_APP_SECRET")
 USER_ID = os.getenv("DROPBOX_USER_ID")
+DROPBOX_REFRESH_TOKEN = os.getenv("DROPBOX_REFRESH_TOKEN")
+DROPBOX_TOKEN_URL = "https://api.dropboxapi.com/oauth2/token"
+
+def get_access_token(app_key, app_secret, refresh_token):
+    """
+    Uses the refresh token to get a new short-lived access token.
+    """
+    basic_auth = base64.b64encode(f"{app_key}:{app_secret}".encode()).decode()
+
+    headers = {
+        "Authorization": f"Basic {basic_auth}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    data = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token
+    }
+
+    response = requests.post(DROPBOX_TOKEN_URL, headers=headers, data=data)
+    response.raise_for_status()
+
+    return response.json()["access_token"]
 
 def upload_to_shared_folder(file_path: str, folder_id):
     """
@@ -20,7 +46,13 @@ def upload_to_shared_folder(file_path: str, folder_id):
     
     if not file.exists():
         return {"error": "File does not exist"}
-
+    
+    # Exchange refresh token for short-lived access token
+    try:
+        access_token = get_access_token(APP_KEY, APP_SECRET, DROPBOX_REFRESH_TOKEN)
+    except requests.RequestException as e:
+        return {"error": "Failed to get access token", "details": str(e)}
+    
     # Read the file content
     file_content = file.read_bytes()
     file_name = file.name
@@ -32,7 +64,7 @@ def upload_to_shared_folder(file_path: str, folder_id):
 
     # Set the request headers
     headers = {
-        "Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Dropbox-API-Select-User": USER_ID,
         "Dropbox-API-Path-Root": json.dumps({
             ".tag": "namespace_id",
