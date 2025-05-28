@@ -134,7 +134,6 @@ def slack_events():
     # Handle message events
     # Main event callback handling
     if data.get("type") == "event_callback":
-        print("event_callback triggered")
         event = data.get("event", {})
         user = event.get("user")
         text = event.get("text")

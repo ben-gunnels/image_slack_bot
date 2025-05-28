@@ -243,12 +243,14 @@ class EventHandler:
         if self._handle_image_prompt_and_generation(output_filename) == 200:
             # Send the output to dropbox
             send_message(self.channel_id, messages.AttemptingDropbox)
-            try:    
-                upload_to_shared_folder(output_filename, self.dropbox_folder_id)
-            except Exception as e:
-                send_message(self.channel_id, messages.DropboxUploadError(e))
+           
+            response = upload_to_shared_folder(output_filename, self.dropbox_folder_id)
+            
+            if response.get("error"):
+                send_message(self.channel_id, messages.DropboxUploadError(response.get("error_summary")))
+            else:
+                send_message(self.channel_id, messages.DropboxSuccessful)
 
-            send_message(self.channel_id, messages.DropboxSuccessful)
             send_file(self.channel_id, output_filename)
             self._cleanup(output_filename)
 
