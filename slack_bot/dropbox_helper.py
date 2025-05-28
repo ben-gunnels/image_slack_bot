@@ -50,7 +50,7 @@ def upload_to_shared_folder(file_path: str, folder_id):
     # Exchange refresh token for short-lived access token
     try:
         access_token = get_access_token(APP_KEY, APP_SECRET, DROPBOX_REFRESH_TOKEN)
-    except requests.RequestException as e:
+    except Exception as e:
         return {"error": "Failed to get access token", "details": str(e)}
     
     # Read the file content
