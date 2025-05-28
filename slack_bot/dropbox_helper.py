@@ -19,6 +19,9 @@ def get_access_token(app_key, app_secret, refresh_token):
     """
     Uses the refresh token to get a new short-lived access token.
     """
+    print(app_key)
+    print(app_secret)
+    print(refresh_token)
     basic_auth = base64.b64encode(f"{app_key}:{app_secret}".encode()).decode()
 
     headers = {
