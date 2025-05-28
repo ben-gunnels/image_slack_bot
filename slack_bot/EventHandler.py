@@ -247,7 +247,7 @@ class EventHandler:
             try:
                 response = upload_to_shared_folder(output_filename, self.dropbox_folder_id)
                 if response.get("error"):
-                    send_message(self.channel_id, messages.DropboxUploadError(response.get("error_summary")))
+                    send_message(self.channel_id, messages.DropboxUploadError(response))
                 else:
                     send_message(self.channel_id, messages.DropboxSuccessful)
             except Exception as e:
