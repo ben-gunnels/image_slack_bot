@@ -58,7 +58,7 @@ class EventHandler:
         self.inject = False # Allows the user to add text to the image generation prompt directly
         self.series = False # Allows the user to enter iterative arguments to create a batch from one image or prompt. 
         self.archive = False # Will prompt the bot to output all of the generated files to Dropbox
-        self.allow_archive = False # This parameter must be manually changed to True to allow archiving
+        self.allow_archive = True # This parameter must be manually changed to True to allow archiving
 
         # Series Attributes
         self.series_params = None
@@ -182,9 +182,8 @@ class EventHandler:
 
     def _handle_archive(self):
         """
-            Archives the image files sent by slack box and sends them to the dropbox folder 
+            Archives the image files sent by slack bot and sends them to the dropbox folder 
             corresponding to the current channel.
-            Downloads the image to the image_outputs folder and then tries uploading to dropbox.
         """
         successes = 0
         send_message(self.channel_id, messages.ArchiveConfirmation)
