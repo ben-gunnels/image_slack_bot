@@ -195,8 +195,6 @@ class EventHandler:
         send_message(self.channel_id, f"{len(files)} # of files found.")
 
         for file in files:
-            print(file)
-            break
             endpoint = file.get('name')
             if not endpoint or endpoint == "error":
                 continue

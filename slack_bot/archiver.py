@@ -70,7 +70,7 @@ def list_files_in_channel(channel_id, start_ts, end_ts, filter_by_user_id=SLACKB
                         if not filter_by_user_id or f.get('user') == filter_by_user_id:
                             files.append({
                                 'name': f.get('name'),
-                                'url': f.get('url_private'),
+                                'url_private': f.get('url_private'),
                                 'user': f.get('user'),
                                 'timestamp': f.get('timestamp')
                             })
