@@ -58,7 +58,7 @@ class EventHandler:
         self.inject = False # Allows the user to add text to the image generation prompt directly
         self.series = False # Allows the user to enter iterative arguments to create a batch from one image or prompt. 
         self.archive = False # Will prompt the bot to output all of the generated files to Dropbox
-        self.allow_archive = True # This parameter must be manually changed to True to allow archiving
+        self.allow_archive = False # This parameter must be manually changed to True to allow archiving
 
         # Series Attributes
         self.series_params = None
