@@ -187,7 +187,10 @@ class EventHandler:
         """
         successes = 0
         send_message(self.channel_id, messages.ArchiveConfirmation)
-        files = list_files_in_channel(self.channel_id)
+        start_ts = to_unix_timestamp("2025-01-01") # Start of the year
+        _, end_ts = get_today_unix_range()
+
+        files = list_files_in_channel(self.channel_id, start_ts, end_ts)
 
         for file in files:
             filename = "image_outputs/" + file.get('name', 'error.png')
