@@ -195,7 +195,10 @@ class EventHandler:
         send_message(self.channel_id, f"{len(files)} # of files found.")
 
         for file in files:
-            filename = "image_outputs/" + file.get('name', 'error.png')
+            endpoint = file.get('name')
+            if not endpoint or endpoint == "error":
+                continue
+            filename = "image_outputs/" + endpoint
             url = file.get('url_private', '')
             if url:
                 download_slack_file(url, filename)
