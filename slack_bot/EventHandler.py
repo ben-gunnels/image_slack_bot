@@ -192,6 +192,8 @@ class EventHandler:
 
         files = list_files_in_channel(self.channel_id, start_ts, end_ts)
 
+        send_message(self.channel_id, f"{len(files)} # of files found.")
+
         for file in files:
             filename = "image_outputs/" + file.get('name', 'error.png')
             url = file.get('url_private', '')

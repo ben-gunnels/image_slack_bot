@@ -79,8 +79,9 @@ def list_files_in_channel(channel_id, start_ts, end_ts, filter_by_user_id=SLACKB
             has_more = bool(next_cursor)
 
         print(f"\nTotal Files Found: {len(files)}")
-        # for file in files:
-        #     print(f"{file['name']} | Uploaded by: {file['user']} | URL: {file['url']}")
+        for i, file in enumerate(files):
+            if i == 0:
+                print(f"{file['name']} | Uploaded by: {file['user']} | URL: {file['url']}")
 
         return files
 
