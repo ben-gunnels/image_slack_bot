@@ -1,7 +1,7 @@
 import re
 import shutil
 import time
-from datetime import datetime, timedelta
+import datetime
 import os
 
 def remove_directory_recursively(path):
@@ -70,14 +70,14 @@ def get_series_params(text):
 
 # Convert a date string to Unix timestamp
 def to_unix_timestamp(date_str):
-    return int(time.mktime(datetime.strptime(date_str, "%Y-%m-%d").timetuple()))
+    return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d").timetuple()))
 
 def get_today_unix_range():
     # Get today's date at midnight
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     start_ts = int(time.mktime(today.timetuple()))
     
     # Get end of today (11:59:59 PM)
-    end_ts = int(time.mktime((today + timedelta(days=1, seconds=-1)).timetuple()))
+    end_ts = int(time.mktime((today + datetime.timedelta(days=1, seconds=-1)).timetuple()))
 
     return start_ts, end_ts
