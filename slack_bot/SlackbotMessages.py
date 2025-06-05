@@ -13,9 +13,11 @@ class SlackBotMessages:
 
     # ERRORS
     PromptError = "There must be a flag and a body to this message to give the model direction. Try again using --inject followed by a prompt."
-    GeneratorError = "Something went wrong with ImageGeneratorBot :( Image request did not pass the vibe check. Try being less vulgar?"
     SeriesError = "When using the --series flag you must specify one or more variable arguments. E.g. {1, 2, 3, 4} somewhere in your message. You must also only include a single image or prompt."
     DropboxError = "File could not be uploaded to DropBox"
+    def GeneratorError(e):
+       return f"Something went wrong with ImageGeneratorBot :( Image request did not pass the vibe check. {e}"
+    
     
     def DropboxUploadError(self, e):
        return f"There was an error uploading to Dropbox: {e}"

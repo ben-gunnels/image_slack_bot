@@ -293,7 +293,7 @@ class EventHandler:
             return 200
         
         except Exception as e:
-            send_message(self.channel_id, messages.GeneratorError)
+            send_message(self.channel_id, messages.GeneratorError(e))
             print(f"Image generation could not be completed. {e}")
 
     def _generate_prompt(self, mode):
