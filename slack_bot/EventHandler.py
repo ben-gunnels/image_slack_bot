@@ -412,10 +412,10 @@ class EventHandler:
             Removes the input image files and the generated output files.
         """
         # Remove stored slack image
-        if os.path.exists(self.input_filename):
+        if self.input_filename and os.path.exists(self.input_filename):
             os.remove(self.input_filename)
    
-        if os.path.exists(output_filename):
+        if output_filename and os.path.exists(output_filename):
             os.remove(output_filename)
 
 
