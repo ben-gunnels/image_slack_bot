@@ -30,6 +30,7 @@ def generate_prompt(mode="image-edit", injection=""):
     The design should be immediately transferrable as printable for a T-Shirt.
     I want the central design with a transparent background.
     If there is text in the image recreate the text.
+    Keep text simple and precise. If the text is too small to be regenerated accurately omit it.
     Ensure the design is centered on the canvas with at least 15% transparent margin so nothing is cropped.
     Transparent background is very important. Zoom out so the entire graphic is visible.
     """

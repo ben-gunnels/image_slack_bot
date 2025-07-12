@@ -5,6 +5,8 @@ oldprompts.txt
 image_outputs/
 user_submitted_files/
 
+get_access_token.py
+
 clean.py
 
 __pycache__
