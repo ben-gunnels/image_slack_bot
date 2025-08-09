@@ -348,6 +348,7 @@ class EventHandler:
 
         if isinstance(generated_image, dict) and generated_image.get("error"):
             send_message(self.channel_id, messages.GeneratorError(generated_image["error"]))
+            return
         else:
             generated_image = generated_image  # bytes
 
