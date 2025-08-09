@@ -46,7 +46,7 @@ def edit_image(logger, prompt, input_filename):
     except Exception as e:
         print(f"Error during image generation: {e}")
         logger.info(f"Error during image generation: {e}")
-        raise
+        return {"error": str(e), "exception": e}
 
 def generate_image(logger, prompt):
     try:
@@ -74,4 +74,4 @@ def generate_image(logger, prompt):
     except Exception as e:
         print(f"Error during image generation: {e}")
         logger.info(f"Error during image generation: {e}")
-        raise
+        return {"error": str(e), "exception": e}

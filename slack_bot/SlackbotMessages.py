@@ -18,7 +18,6 @@ class SlackBotMessages:
     def GeneratorError(e):
        return f"Something went wrong with ImageGeneratorBot :( Image request did not pass the vibe check. {e}"
     
-    
     def DropboxUploadError(self, e):
        return f"There was an error uploading to Dropbox: {e}"
 
