@@ -65,6 +65,7 @@ def generate_image(logger, prompt):
                 prompt=prompt[:1000], # Input prompt is restricted to 100 characters
                 size="1024x1024",
                 n=1,
+                moderation="low"
             )
 
         image_base64 = response.data[0].b64_json
